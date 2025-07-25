@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | Développeur Flutter & Django</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/three@0.132.2/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        /* Variables CSS pour les thèmes */
+        :root {
+            --bg-primary: #f9fafb;
+            --bg-secondary: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-card: #374151;
+            --text-primary: #e5e7eb;
+            --text-secondary: #d1d5db;
+            --border-color: #4b5563;
+            --nav-bg: rgba(17, 24, 39, 0.8);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .bg-gray-50 { background-color: var(--bg-primary) !important; }
+        .bg-gray-100 { background-color: var(--bg-secondary) !important; }
+        .bg-white { background-color: var(--bg-card) !important; }
+        .text-gray-800 { color: var(--text-primary) !important; }
+        .text-gray-600 { color: var(--text-secondary) !important; }
+        .border-gray-300 { border-color: var(--border-color) !important; }
+        
+        .nav-bg {
+            background-color: var(--nav-bg);
+            backdrop-filter: blur(12px);
+        }
+        
+        .scene-3d {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .language-switcher {
+            transition: all 0.3s ease;
+        }
+        .language-switcher:hover {
+            transform: scale(1.1);
+        }
+        .project-card {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            background-color: var(--bg-card);
+        }
+        .project-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .skill-badge {
+            transition: all 0.2s ease;
+        }
+        .skill-badge:hover {
+            transform: translateY(-2px);
+        }
+        .language-dropdown {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            background-color: var(--bg-card);
+        }
+        .language-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+        
+        /* Styles pour les cartes */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Styles pour les boutons hover */
+        .btn-hover:hover {
+            background-color: var(--bg-secondary);
+        }
+        
+        /* Animation pour le bouton de thème */
+        .theme-toggle {
+            background-color: transparent;
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--bg-secondary);
+        }
+        
+        .theme-icon {
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body class="smooth-scroll">
+    <!-- Scene 3D en arrière-plan -->
+    <div id="scene-3d" class="scene-3d"></div>
+
+    <!-- Barre de navigation -->
+    <nav class="fixed w-full z-50 nav-bg shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <div class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+                        MOHAMMED AMINE BAICH
+                    </div>
+                </div>
+
+                <!-- Liens de navigation -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="#about" class="px-3 py-2 font-medium hover:text-purple-600 transition" data-text-fr="À propos" data-text-en="About">À propos</a>
+                    <a href="#skills" class="px-3 py-2 font-medium hover:text-purple-600 transition" data-text-fr="Compétences" data-text-en="Skills">Compétences</a>
+                    <a href="#projects" class="px-3 py-2 font-medium hover:text-purple-600 transition" data-text-fr="Projets" data-text-en="Projects">Projets</a>
+                    <a href="#experience" class="px-3 py-2 font-medium hover:text-purple-600 transition" data-text-fr="Expérience" data-text-en="Experience">Expérience</a>
+                    <a href="#contact" class="px-3 py-2 font-medium hover:text-purple-600 transition" data-text-fr="Contact" data-text-en="Contact">Contact</a>
+                </div>
+
+                <!-- Boutons droite -->
+                <div class="flex items-center space-x-4">
+                    <!-- Dark/Light mode -->
+                    <button id="theme-toggle" class="theme-toggle btn-hover">
+                        <i id="theme-icon" class="fas fa-moon theme-icon"></i>
+                    </button>
+
+                    <!-- Sélecteur de langue -->
+                    <div class="relative">
+                        <button id="language-toggle" class="language-switcher p-2 rounded-full btn-hover transition flex items-center">
+                            <span id="current-lang" class="mr-1">FR</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="language-dropdown" class="language-dropdown absolute right-0 mt-2 w-24 rounded-md shadow-lg py-1">
+                            <button data-lang="fr" class="block w-full text-left px-4 py-2 btn-hover transition">Français</button>
+                            <button data-lang="en" class="block w-full text-left px-4 py-2 btn-hover transition">English</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <h1 class="text-5xl md:text-6xl font-bold leading-tight">
+                        <span class="bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent" data-text-fr="Développeur Full-Stack" data-text-en="Full-Stack Developer">Développeur Full-Stack</span>
+                    </h1>
+                    <p class="text-xl" data-text-fr="Spécialisé en développement mobile avec Flutter et backend avec Django. Diplômé en systèmes d'information et master en intelligence artificielle." data-text-en="Specialized in mobile development with Flutter and backend with Django. Graduate in information systems and master's in artificial intelligence.">
+                        Spécialisé en développement mobile avec Flutter et backend avec Django. Diplômé en systèmes d'information et master en intelligence artificielle.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#contact" class="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition" data-text-fr="Me contacter" data-text-en="Contact me">
+                            Me contacter
+                        </a>
+                        <a href="#projects" class="border-2 border-purple-600 text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition" data-text-fr="Voir mes projets" data-text-en="View my projects">
+                            Voir mes projets
+                        </a>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="relative w-full h-96 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl overflow-hidden shadow-2xl">
+                        <!-- Animation 3D ou illustration -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-mobile-alt text-white text-8xl opacity-30"></i>
+                            <i class="fas fa-server text-white text-6xl opacity-30 absolute top-1/4 right-1/4"></i>
+                            <i class="fas fa-robot text-white text-5xl opacity-30 absolute bottom-1/4 left-1/4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- À propos -->
+    <section id="about" class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold" data-text-fr="À propos de moi" data-text-en="About me">
+                    À propos de moi
+                </h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card p-8 rounded-xl shadow-lg hover:shadow-xl transition">
+                    <div class="text-purple-600 text-4xl mb-4">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3" data-text-fr="Formation" data-text-en="Education">
+                        Formation
+                    </h3>
+                    <p data-text-fr="Licence en Systèmes d'Information et Master en Intelligence Artificielle et ses applications." data-text-en="Bachelor's in Information Systems and Master's in Artificial Intelligence and its applications.">
+                        Licence en Systèmes d'Information et Master en Intelligence Artificielle et ses applications.
+                    </p>
+                </div>
+
+                <div class="card p-8 rounded-xl shadow-lg hover:shadow-xl transition">
+                    <div class="text-purple-600 text-4xl mb-4">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3" data-text-fr="Expérience" data-text-en="Experience">
+                        Expérience
+                    </h3>
+                    <p data-text-fr="Développeur chez MCS Technology et PlastPaper, avec plusieurs projets réalisés en Flutter et Django." data-text-en="Developer at MCS Technology and PlastPaper, with several projects completed in Flutter and Django.">
+                        Développeur chez MCS Technology et PlastPaper, avec plusieurs projets réalisés en Flutter et Django.
+                    </p>
+                </div>
+
+                <div class="card p-8 rounded-xl shadow-lg hover:shadow-xl transition">
+                    <div class="text-purple-600 text-4xl mb-4">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3" data-text-fr="Expertise" data-text-en="Expertise">
+                        Expertise
+                    </h3>
+                    <p data-text-fr="Développement mobile (Flutter), desktop, web et backend (Django). Applications d'IA et solutions innovantes." data-text-en="Mobile development (Flutter), desktop, web and backend (Django). AI applications and innovative solutions.">
+                        Développement mobile (Flutter), desktop, web et backend (Django). Applications d'IA et solutions innovantes.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compétences -->
+    <section id="skills" class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold" data-text-fr="Mes Compétences" data-text-en="My Skills">
+                    Mes Compétences
+                </h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Flutter -->
+                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 p-3 rounded-full mr-4">
+                            <i class="text-blue-600 text-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 32 32"><polyline points="15.383 18.316 18.744 15.042 27.093 15.042 19.697 22.438 15.383 18.316 15.383 18.316 15.383 18.316 15.383 18.316 15.383 18.316" style="fill:#40d0fd"/><polygon points="4.907 16.125 9.106 20.424 27.093 2.287 18.744 2.287 4.907 16.125" style="fill:#41d0fd;isolation:isolate"/><polygon points="11.176 22.479 15.435 26.675 19.697 22.438 15.383 18.316 11.176 22.479" style="fill:#1fbcfd"/><polygon points="15.435 26.675 19.697 22.438 26.989 29.813 18.593 29.813 15.435 26.675" style="fill:#095a9d"/><polygon points="15.435 26.675 19.406 25.354 18.068 24.057 15.435 26.675" style="fill:#0e5199"/></svg>
+                            </i>
+                        </div>
+                        <h3 class="text-xl font-bold">Flutter</h3>
+                    </div>
+                    <p class="mb-4" data-text-fr="Développement d'applications multiplateformes pour mobile, desktop et web." data-text-en="Cross-platform application development for mobile, desktop and web.">
+                        Développement d'applications multiplateformes pour mobile, desktop et web.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="skill-badge bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Dart</span>
+                        <span class="skill-badge bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Firebase</span>
+                        <span class="skill-badge bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">GetX</span>
+                    </div>
+                </div>
+
+                <!-- Django -->
+                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-green-100 p-3 rounded-full mr-4">
+                            <i class="fab fa-python text-green-600 text-2xl ml-1 mr-1" ></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Django</h3>
+                    </div>
+                    <p class="mb-4" data-text-fr="Développement backend robuste et sécurisé avec Django REST Framework." data-text-en="Robust and secure backend development with Django REST Framework.">
+                        Développement backend robuste et sécurisé avec Django REST Framework.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="skill-badge bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">Python</span>
+                        <span class="skill-badge bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">PostgreSQL</span>
+                        <span class="skill-badge bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">DRF</span>
+                    </div>
+                </div>
+
+                <!-- IA -->
+                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-purple-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-brain text-purple-600 text-2xl ml-1 mr-1"></i>
+                        </div>
+                        <h3 class="text-xl font-bold" data-text-fr="Intelligence Artificielle" data-text-en="Artificial Intelligence">
+                            Intelligence Artificielle
+                        </h3>
+                    </div>
+                    <p class="mb-4" data-text-fr="Applications d'IA, machine learning et traitement de données." data-text-en="AI applications, machine learning and data processing.">
+                        Applications d'IA, machine learning et traitement de données.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Numpy</span>
+                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Matplotlib</span>
+                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Pandas</span>
+                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Sklearn</span>
+                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">TensorFlow</span>
+                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Keras</span>
+                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">NLP</span>
+                    </div>
+                </div>
+
+                <!-- Web Development -->
+                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-orange-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-globe text-orange-600 text-2xl ml-1 mr-1"></i>
+                        </div>
+                        <h3 class="text-xl font-bold" data-text-fr="Développement Web" data-text-en="Web Development">
+                            Développement Web
+                        </h3>
+                    </div>
+                    <p class="mb-4" data-text-fr="Création de sites web modernes et applications web responsives." data-text-en="Creation of modern websites and responsive web applications.">
+                        Création de sites web modernes et applications web responsives.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="skill-badge bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">HTML/CSS</span>
+                        <span class="skill-badge bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">JavaScript</span>
+                        <span class="skill-badge bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">TailwindCss</span>
+                    </div>
+                </div>
+
+                <!-- Database -->
+                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-red-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-database text-red-600 text-2xl ml-1 mr-1"></i>
+                        </div>
+                        <h3 class="text-xl font-bold" data-text-fr="Bases de données" data-text-en="Databases">
+                            Bases de données
+                        </h3>
+                    </div>
+                    <p class="mb-4" data-text-fr="Conception et gestion de bases de données relationnelles et NoSQL." data-text-en="Design and management of relational and NoSQL databases.">
+                        Conception et gestion de bases de données relationnelles et NoSQL.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="skill-badge bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">PostgreSQL</span>
+                        <span class="skill-badge bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">MySQL</span>
+                        <span class="skill-badge bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">SQL Server</span>
+                        <span class="skill-badge bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">MongoDB</span>
+                        <span class="skill-badge bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">SQLite</span>
+                    </div>
+                </div>
+
+                <!-- DevOps -->
+                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-gray-100 p-3 rounded-full mr-4 ">
+                            <i class="fas fa-cogs text-gray-600 text-2xl ml-1 mr-1"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">DevOps</h3>
+                    </div>
+                    <p class="mb-4" data-text-fr="Déploiement et gestion d'infrastructure cloud." data-text-en="Deployment and cloud infrastructure management.">
+                        Déploiement et gestion d'infrastructure cloud.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="skill-badge bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">Docker</span>
+                        <span class="skill-badge bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">AWS</span>
+                        <span class="skill-badge bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">Git</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projets -->
+    <section id="projects" class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold" data-text-fr="Mes Projets" data-text-en="My Projects">
+                    Mes Projets
+                </h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Projet 1 -->
+                <div class="project-card rounded-xl overflow-hidden shadow-lg">
+                    <div class="h-48 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                        <i class="fas fa-shopping-cart text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2" data-text-fr="Application E-commerce" data-text-en="E-commerce Application">Application E-commerce</h3>
+                        <p class="mb-4" data-text-fr="Application mobile Flutter avec backend Django. Gestion de produits, panier et paiement." data-text-en="Flutter mobile application with Django backend. Product management, cart and payment.">
+                            Application mobile Flutter avec backend Django. Gestion de produits, panier et paiement.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Flutter</span>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Django</span>
+                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Firebase</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projet 2 -->
+                <div class="project-card rounded-xl overflow-hidden shadow-lg">
+                    <div class="h-48 bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2" data-text-fr="Système de recommandation" data-text-en="Recommendation System">
+                            Système de recommandation
+                        </h3>
+                        <p class="mb-4" data-text-fr="Système de recommandation basé sur l'IA pour une plateforme éducative." data-text-en="AI-based recommendation system for an educational platform.">
+                            Système de recommandation basé sur l'IA pour une plateforme éducative.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">Python</span>
+                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">TensorFlow</span>
+                            <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs">NLP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projet 3 -->
+                <div class="project-card rounded-xl overflow-hidden shadow-lg">
+                    <div class="h-48 bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center">
+                        <i class="fas fa-chart-line text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2" data-text-fr="Dashboard Analytique" data-text-en="Analytics Dashboard">
+                            Dashboard Analytique
+                        </h3>
+                        <p class="mb-4" data-text-fr="Application web avec visualisation de données en temps réel." data-text-en="Web application with real-time data visualization.">
+                            Application web avec visualisation de données en temps réel.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Flutter Web</span>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Django</span>
+                            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">WebSockets</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Expérience -->
+    <section id="experience" class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold" data-text-fr="Expérience Professionnelle" data-text-en="Professional Experience">
+                    Expérience Professionnelle
+                </h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
+            </div>
+
+            <div class="relative">
+                <!-- Ligne de temps -->
+                <div class="border-l-2 border-purple-500 absolute h-full left-1/2 transform -translate-x-1/2"></div>
+
+                <!-- Expérience 1 -->
+                <div class="mb-8 flex justify-between items-center w-full right-timeline">
+                    <div class="order-1 w-5/12"></div>
+                    <div class="order-1 w-5/12 px-1 py-4">
+                        <div class="card p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold text-purple-600">MCS Technology</h3>
+                            <p class="mb-2" data-text-fr="Développeur Full-Stack" data-text-en="Full-Stack Developer">Développeur Full-Stack</p>
+                            <p class="text-sm mb-2">2021 - 2022</p>
+                            <p data-text-fr="Développement d'applications mobiles avec Flutter et création d'APIs avec Django." data-text-en="Mobile application development with Flutter and API creation with Django.">
+                                Développement d'applications mobiles avec Flutter et création d'APIs avec Django.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expérience 2 -->
+                <div class="mb-8 flex justify-between items-center w-full left-timeline">
+                    <div class="order-1 w-5/12 px-1 py-4">
+                        <div class="card p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold text-purple-600">PlastPaper</h3>
+                            <p class="mb-2" data-text-fr="Développeur Flutter" data-text-en="Flutter Developer">Développeur Flutter</p>
+                            <p class="text-sm mb-2">2022 - Présent</p>
+                            <p data-text-fr="Développement d'applications multiplateformes et intégration de solutions IA." data-text-en="Cross-platform application development and AI solutions integration.">
+                                Développement d'applications multiplateformes et intégration de solutions IA.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="order-1 w-5/12"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certificats -->
+    <section class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold" data-text-fr="Certifications" data-text-en="Certifications">
+                    Certifications
+                </h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Certificat 1 -->
+                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-yellow-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-certificate text-yellow-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Flutter Expert</h3>
+                    </div>
+                    <p class="mb-2" data-text-fr="Certification avancée en développement Flutter." data-text-en="Advanced certification in Flutter development.">
+                        Certification avancée en développement Flutter.
+                    </p>
+                    <p class="text-sm">2021</p>
+                </div>
+
+                <!-- Certificat 2 -->
+                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-red-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-robot text-red-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold" data-text-fr="Spécialiste en IA" data-text-en="AI Specialist">
+                            Spécialiste en IA
+                        </h3>
+                    </div>
+                    <p class="mb-2" data-text-fr="Master en Intelligence Artificielle et ses applications." data-text-en="Master's in Artificial Intelligence and its applications.">
+                        Master en Intelligence Artificielle et ses applications.
+                    </p>
+                    <p class="text-sm">2020</p>
+                </div>
+
+                <!-- Certificat 3 -->
+                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-green-100 p-3 rounded-full mr-4">
+                            <i class="fab fa-python text-green-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Django Professional</h3>
+                    </div>
+                    <p class="mb-2" data-text-fr="Certification en développement backend avec Django." data-text-en="Certification in backend development with Django.">
+                        Certification en développement backend avec Django.
+                    </p>
+                    <p class="text-sm">2019</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold" data-text-fr="Contactez-moi" data-text-en="Contact me">
+                    Contactez-moi
+                </h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-2xl font-bold mb-6" data-text-fr="Disponible pour de nouvelles opportunités" data-text-en="Available for new opportunities">
+                        Disponible pour de nouvelles opportunités
+                    </h3>
+                    <p class="mb-8" data-text-fr="Si vous avez un projet intéressant ou souhaitez discuter d'une collaboration, n'hésitez pas à me contacter." data-text-en="If you have an interesting project or would like to discuss a collaboration, please don't hesitate to contact me.">
+                        Si vous avez un projet intéressant ou souhaitez discuter d'une collaboration, n'hésitez pas à me contacter.
+                    </p>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-envelope text-purple-600"></i>
+                            </div>
+                            <span>aminebaich116@gmail.com</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-phone-alt text-blue-600"></i>
+                            </div>
+                            <span>+213 7 70 08 92 76</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <h4 class="font-bold mb-4" data-text-fr="Réseaux sociaux" data-text-en="Social networks">
+                            Réseaux sociaux
+                        </h4>
+                        <div class="flex space-x-4">
+                            <a href="#" class="btn-hover p-3 rounded-full hover:bg-purple-600 hover:text-white transition">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="btn-hover p-3 rounded-full hover:bg-blue-500 hover:text-white transition">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="btn-hover p-3 rounded-full hover:bg-gray-800 hover:text-white transition">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="#" class="btn-hover p-3 rounded-full hover:bg-pink-600 hover:text-white transition">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-8 rounded-xl shadow-lg">
+                    <form id="contact-form">
+                        <div class="mb-6">
+                            <label for="name" class="block mb-2 font-medium" data-text-fr="Nom complet" data-text-en="Full name">
+                                Nom complet
+                            </label>
+                            <input type="text" id="name" class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="mb-6">
+                            <label for="email" class="block mb-2 font-medium" data-text-fr="Email" data-text-en="Email">
+                                Email
+                            </label>
+                            <input type="email" id="email" class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="mb-6">
+                            <label for="message" class="block mb-2 font-medium" data-text-fr="Message" data-text-en="Message">
+                                Message
+                            </label>
+                            <textarea id="message" rows="5" class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 rounded-lg font-medium hover:shadow-lg transition" data-text-fr="Envoyer le message" data-text-en="Send message">
+                            Envoyer le message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-lg font-semibold">Mohammed Amine Baich</p>
+                    <p class="text-sm" data-text-fr="Développeur Full-Stack passionné par l'innovation technologique." data-text-en="Full-Stack Developer passionate about technological innovation.">
+                        Développeur Full-Stack passionné par l'innovation technologique.
+                    </p>
+                </div>
+                <div class="flex flex-col items-center md:items-end">
+                    <div class="flex space-x-6 mb-4">
+                        <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-linkedin-in text-xl"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition"><i class="fab fa-twitter text-xl"></i></a>
+                        <a href="#" class="hover:text-gray-400 transition"><i class="fab fa-github text-xl"></i></a>
+                        <a href="#" class="hover:text-pink-400 transition"><i class="fab fa-instagram text-xl"></i></a>
+                    </div>
+                    <p class="text-sm" data-text-fr="© 2023 Tous droits réservés" data-text-en="© 2023 All rights reserved">
+                        © 2023 Tous droits réservés
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Variables globales
+        let currentLanguage = 'fr';
+        let currentTheme = 'light';
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            initializeLanguage();
+            setupEventListeners();
+            
+            // Démarrer l'animation 3D seulement sur desktop
+            if (window.innerWidth > 768) {
+                init3DScene();
+            }
+        });
+
+        function initializeTheme() {
+            // Vérifier le thème préféré au chargement
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                currentTheme = 'dark';
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                currentTheme = 'light';
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+            
+            updateThemeIcon();
+        }
+
+        function initializeLanguage() {
+            // Charger la langue préférée au démarrage
+            const savedLanguage = localStorage.getItem('language') || 'fr';
+            changeLanguage(savedLanguage);
+        }
+
+        function setupEventListeners() {
+            // Dark/Light mode toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', toggleTheme);
+            }
+
+            // Gestion du dropdown de langue
+            const languageToggle = document.getElementById('language-toggle');
+            const languageDropdown = document.getElementById('language-dropdown');
+            
+            if (languageToggle && languageDropdown) {
+                languageToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    languageDropdown.classList.toggle('show');
+                });
+
+                // Fermer le dropdown si on clique ailleurs
+                document.addEventListener('click', (e) => {
+                    if (!languageToggle.contains(e.target) && !languageDropdown.contains(e.target)) {
+                        languageDropdown.classList.remove('show');
+                    }
+                });
+
+                // Gestion du changement de langue
+                const langButtons = languageDropdown.querySelectorAll('[data-lang]');
+                langButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const lang = button.getAttribute('data-lang');
+                        changeLanguage(lang);
+                        languageDropdown.classList.remove('show');
+                    });
+                });
+            }
+
+            // Gestion du formulaire de contact
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('name').value;
+                    const email = document.getElementById('email').value;
+                    const message = document.getElementById('message').value;
+                    
+                    if (name && email && message) {
+                        alert(currentLanguage === 'fr' ? 'Message envoyé avec succès!' : 'Message sent successfully!');
+                        contactForm.reset();
+                    } else {
+                        alert(currentLanguage === 'fr' ? 'Veuillez remplir tous les champs.' : 'Please fill in all fields.');
+                    }
+                });
+            }
+
+            // Smooth scrolling pour les liens de navigation
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) {
+                if (currentTheme === 'dark') {
+                    themeIcon.className = 'fas fa-sun theme-icon';
+                } else {
+                    themeIcon.className = 'fas fa-moon theme-icon';
+                }
+            }
+        }
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Mettre à jour l'affichage de la langue actuelle
+            const currentLangSpan = document.getElementById('current-lang');
+            if (currentLangSpan) {
+                currentLangSpan.textContent = lang.toUpperCase();
+            }
+            
+            // Mettre à jour tous les éléments avec des attributs data-text
+            const elementsWithText = document.querySelectorAll('[data-text-fr][data-text-en]');
+            
+            elementsWithText.forEach(element => {
+                const textKey = `data-text-${lang}`;
+                if (element.hasAttribute(textKey)) {
+                    element.textContent = element.getAttribute(textKey);
+                }
+            });
+
+            // Mettre à jour l'attribut lang du document
+            document.documentElement.setAttribute('lang', lang);
+            
+            // Sauvegarder la préférence de langue
+            localStorage.setItem('language', lang);
+        }
+
+        // Animation 3D avec Three.js
+        function init3DScene() {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            const sceneContainer = document.getElementById('scene-3d');
+            if (sceneContainer) {
+                sceneContainer.appendChild(renderer.domElement);
+            }
+
+            // Lumière
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(1, 1, 1);
+            scene.add(light);
+
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            // Formes géométriques
+            const geometry1 = new THREE.TorusGeometry(1, 0.4, 16, 100);
+            const material1 = new THREE.MeshPhongMaterial({ 
+                color: 0x7b46f5,
+                transparent: true,
+                opacity: 0.7,
+                shininess: 100
+            });
+            const torus = new THREE.Mesh(geometry1, material1);
+            scene.add(torus);
+
+            const geometry2 = new THREE.IcosahedronGeometry(0.8, 0);
+            const material2 = new THREE.MeshPhongMaterial({ 
+                color: 0x3b82f6,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.5
+            });
+            const icosahedron = new THREE.Mesh(geometry2, material2);
+            scene.add(icosahedron);
+
+            camera.position.z = 5;
+
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                torus.rotation.x += 0.005;
+                torus.rotation.y += 0.01;
+                
+                icosahedron.rotation.x -= 0.005;
+                icosahedron.rotation.y -= 0.01;
+                
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Redimensionnement
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+    </script>
+</body>
+</html>
+
