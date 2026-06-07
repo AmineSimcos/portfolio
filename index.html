@@ -3,904 +3,977 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio | Développeur Flutter & Django</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/three@0.132.2/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <title>Mohammed Amine Baich – Développeur Full-Stack & IA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Nouvelles polices modernes : Plus Jakarta Sans (Titres) & Inter (Corps du texte) -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        
-        /* Variables CSS pour les thèmes */
         :root {
-            --bg-primary: #f9fafb;
-            --bg-secondary: #f3f4f6;
-            --bg-card: #ffffff;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --border-color: #e5e7eb;
-            --nav-bg: rgba(255, 255, 255, 0.8);
+            --bg: #0a0a0f;
+            --bg2: #111118;
+            --card: #16161f;
+            --card2: #1c1c28;
+            --border: #2a2a3a;
+            --text: #e8e8f0;
+            --muted: #888899;
+            --accent: #6c63ff;
+            --accent2: #00d4aa;
+            --accent3: #ff6b6b;
+            --glow: rgba(108, 99, 255, 0.15);
         }
-        
-        [data-theme="dark"] {
-            --bg-primary: #111827;
-            --bg-secondary: #1f2937;
-            --bg-card: #374151;
-            --text-primary: #e5e7eb;
-            --text-secondary: #d1d5db;
-            --border-color: #4b5563;
-            --nav-bg: rgba(17, 24, 39, 0.8);
+        [data-theme="light"] {
+            --bg: #f5f5fa;
+            --bg2: #eeeef8;
+            --card: #ffffff;
+            --card2: #f0f0f8;
+            --border: #dddded;
+            --text: #1a1a2e;
+            --muted: #666680;
+            --glow: rgba(108, 99, 255, 0.08);
         }
-        
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             overflow-x: hidden;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background 0.3s, color 0.3s;
         }
-        
-        .bg-gray-50 { background-color: var(--bg-primary) !important; }
-        .bg-gray-100 { background-color: var(--bg-secondary) !important; }
-        .bg-white { background-color: var(--bg-card) !important; }
-        .text-gray-800 { color: var(--text-primary) !important; }
-        .text-gray-600 { color: var(--text-secondary) !important; }
-        .border-gray-300 { border-color: var(--border-color) !important; }
-        
-        .nav-bg {
-            background-color: var(--nav-bg);
-            backdrop-filter: blur(12px);
+
+        /* ── NOISE TEXTURE ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 0; opacity: 0.4;
         }
-        
-        .scene-3d {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 0 2rem;
+            background: rgba(10,10,15,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px;
+            transition: background 0.3s;
         }
-        .language-switcher {
-            transition: all 0.3s ease;
+        [data-theme="light"] nav { background: rgba(245,245,250,0.88); }
+
+        .nav-logo {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1.15rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .language-switcher:hover {
-            transform: scale(1.1);
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a {
+            color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500;
+            transition: color 0.2s; letter-spacing: 0.3px;
         }
-        .project-card {
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-            background-color: var(--bg-card);
+        .nav-links a:hover { color: var(--text); }
+
+        .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+        .nav-btn {
+            background: none; border: 1px solid var(--border);
+            color: var(--muted); border-radius: 8px; padding: 6px 12px;
+            font-family: 'Inter', sans-serif; font-size: 0.82rem;
+            cursor: pointer; transition: all 0.2s;
         }
-        .project-card:hover {
-            transform: translateY(-10px) scale(1.03);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center;
+            padding: 100px 2rem 60px;
+            position: relative; overflow: hidden;
         }
-        .skill-badge {
-            transition: all 0.2s ease;
+
+        .hero-grid {
+            max-width: 1200px; margin: 0 auto;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
         }
-        .skill-badge:hover {
-            transform: translateY(-2px);
+
+        .hero-tag {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 100px; padding: 6px 14px;
+            font-size: 0.78rem; color: var(--accent2); margin-bottom: 1.5rem;
         }
-        .language-dropdown {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            background-color: var(--bg-card);
+        .hero-tag::before {
+            content: ''; width: 7px; height: 7px;
+            background: var(--accent2); border-radius: 50%;
+            animation: pulse 2s infinite;
         }
-        .language-dropdown.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
         }
-        .smooth-scroll {
-            scroll-behavior: smooth;
+
+        .hero h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: clamp(2.8rem, 5vw, 4.2rem);
+            font-weight: 800; line-height: 1.08;
+            letter-spacing: -1.5px; margin-bottom: 1.2rem;
         }
-        
-        /* Styles pour les cartes */
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        
-        /* Styles pour les boutons hover */
-        .btn-hover:hover {
-            background-color: var(--bg-secondary);
+
+        .hero-desc {
+            font-size: 1.05rem; color: var(--muted); line-height: 1.7;
+            max-width: 480px; margin-bottom: 2rem;
         }
-        
-        /* Animation pour le bouton de thème */
-        .theme-toggle {
-            background-color: transparent;
-            border: none;
-            padding: 8px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+
+        .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #8b80ff);
+            color: #fff; border: none; border-radius: 12px;
+            padding: 13px 28px; font-size: 0.9rem; font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 0 20px rgba(108,99,255,0.3);
         }
-        
-        .theme-toggle:hover {
-            background-color: var(--bg-secondary);
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(108,99,255,0.45); }
+
+        .btn-secondary {
+            background: var(--card); border: 1px solid var(--border);
+            color: var(--text); border-radius: 12px;
+            padding: 13px 28px; font-size: 0.9rem; font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px;
         }
-        
-        .theme-icon {
-            font-size: 18px;
-            color: var(--text-primary);
+        .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Hero visual */
+        .hero-visual {
+            position: relative; display: flex; justify-content: center;
         }
+        .hero-card-stack {
+            position: relative; width: 360px; height: 420px;
+        }
+        .hc {
+            position: absolute; border-radius: 20px;
+            background: var(--card); border: 1px solid var(--border);
+            padding: 24px;
+        }
+        .hc-back {
+            width: 300px; height: 360px;
+            top: 40px; left: 40px;
+            background: var(--card2);
+            transform: rotate(6deg);
+            opacity: 0.5;
+        }
+        .hc-mid {
+            width: 300px; height: 360px;
+            top: 20px; left: 20px;
+            transform: rotate(3deg);
+            opacity: 0.75;
+            background: linear-gradient(135deg, var(--card), var(--card2));
+        }
+        .hc-front {
+            width: 300px; height: 360px;
+            top: 0; left: 0;
+            display: flex; flex-direction: column; gap: 18px;
+        }
+        .hc-avatar {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.3rem; color: #fff;
+        }
+        .hc-name { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.1rem; }
+        .hc-role { font-size: 0.82rem; color: var(--muted); }
+        .hc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+        .hc-stat {
+            background: var(--bg2); border-radius: 10px; padding: 12px;
+            text-align: center;
+        }
+        .hc-stat-num { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.4rem; }
+        .hc-stat-lbl { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+        .hc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .hc-tag {
+            background: rgba(108,99,255,0.12); color: var(--accent);
+            border-radius: 6px; padding: 4px 10px; font-size: 0.75rem;
+        }
+
+        /* ── SECTION LAYOUT ── */
+        section { padding: 100px 2rem; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .sec-header { text-align: center; margin-bottom: 64px; }
+        .sec-eyebrow {
+            font-size: 0.78rem; text-transform: uppercase; letter-spacing: 3px;
+            color: var(--accent2); margin-bottom: 12px; font-weight: 600;
+        }
+        .sec-title {
+            font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+            font-size: clamp(1.9rem, 3.5vw, 2.8rem); letter-spacing: -1.5px;
+        }
+        .sec-line {
+            width: 50px; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 99px; margin: 16px auto 0;
+        }
+
+        /* ── SKILLS ── */
+        .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .skill-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 18px; padding: 28px;
+            transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .skill-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+        }
+        .skill-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+        .skill-card:hover::before { transform: scaleX(1); }
+        .skill-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin-bottom: 16px;
+        }
+        .skill-card h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
+        .skill-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+        .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+        .badge {
+            border-radius: 6px; padding: 4px 10px;
+            font-size: 0.73rem; font-weight: 500;
+        }
+
+        /* ── PROJECTS ── */
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; }
+        .proj-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 20px; overflow: hidden;
+            transition: all 0.3s; display: flex; flex-direction: column;
+        }
+        .proj-card:hover { border-color: var(--accent); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .proj-header {
+            height: 140px; display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        .proj-header i { font-size: 3.5rem; opacity: 0.9; color: #fff; z-index: 1; }
+        .proj-body { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+        .proj-type {
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--accent2); font-weight: 600; margin-bottom: 8px;
+        }
+        .proj-body h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 10px; }
+        .proj-body p { font-size: 0.86rem; color: var(--muted); line-height: 1.65; margin-bottom: 16px; flex: 1; }
+        .proj-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+        .proj-tag {
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 6px; padding: 4px 10px; font-size: 0.73rem; color: var(--muted);
+        }
+        .proj-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--accent); font-size: 0.85rem; text-decoration: none;
+            font-weight: 500; transition: gap 0.2s;
+        }
+        .proj-link:hover { gap: 10px; }
+
+        /* Featured project */
+        .proj-featured {
+            grid-column: 1 / -1;
+            display: grid; grid-template-columns: 1fr 1fr;
+        }
+        .proj-featured .proj-header { height: auto; min-height: 240px; }
+        @media (max-width: 768px) {
+            .proj-featured { grid-column: auto; display: flex; flex-direction: column; }
+        }
+
+        /* ── EXPERIENCE ── */
+        .exp-timeline { position: relative; max-width: 800px; margin: 0 auto; }
+        .exp-timeline::before {
+            content: ''; position: absolute; left: 24px; top: 0; bottom: 0;
+            width: 1px; background: var(--border);
+        }
+        .exp-item { display: flex; gap: 32px; margin-bottom: 48px; }
+        .exp-dot-wrap { flex-shrink: 0; width: 48px; display: flex; flex-direction: column; align-items: center; }
+        .exp-dot {
+            width: 12px; height: 12px; border-radius: 50%; margin-top: 6px;
+            background: var(--accent); border: 2px solid var(--bg);
+            box-shadow: 0 0 0 4px rgba(108,99,255,0.2);
+        }
+        .exp-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 24px; flex: 1; transition: border-color 0.2s;
+        }
+        .exp-card:hover { border-color: var(--accent); }
+        .exp-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+        .exp-company { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.1rem; }
+        .exp-role { color: var(--accent2); font-size: 0.9rem; font-weight: 500; margin-bottom: 12px; }
+        .exp-date {
+            background: var(--card2); border: 1px solid var(--border);
+            border-radius: 8px; padding: 4px 12px;
+            font-size: 0.78rem; color: var(--muted);
+        }
+        .exp-desc { font-size: 0.87rem; color: var(--muted); line-height: 1.7; margin-bottom: 14px; }
+        .exp-items list-style: none;
+        .exp-items li {
+            font-size: 0.85rem; color: var(--muted); padding: 4px 0 4px 18px;
+            position: relative;
+        }
+        .exp-items li::before {
+            content: '▸'; position: absolute; left: 0; color: var(--accent); font-size: 0.75rem;
+        }
+
+        /* ── EDUCATION ── */
+        .edu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .edu-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 28px; transition: all 0.2s;
+        }
+        .edu-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .edu-year { font-size: 0.78rem; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+        .edu-degree { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+        .edu-school { font-size: 0.85rem; color: var(--muted); }
+
+        /* ── CONTACT ── */
+        .contact-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+        @media (max-width: 768px) { .contact-wrap { grid-template-columns: 1fr; } }
+        .contact-info { }
+        .contact-info h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 2rem; letter-spacing: -1px; margin-bottom: 16px; }
+        .contact-info p { color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+        .contact-item {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
+        }
+        .contact-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+        .contact-item a { color: var(--text); text-decoration: none; font-size: 0.9rem; }
+        .contact-item a:hover { color: var(--accent); }
+        .socials { display: flex; gap: 12px; margin-top: 24px; }
+        .social-btn {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--card); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--muted); text-decoration: none; font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .social-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+        /* Contact form */
+        .contact-form { display: flex; flex-direction: column; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 0.82rem; font-weight: 500; color: var(--muted); }
+        .form-group input, .form-group textarea {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px 16px;
+            color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem;
+            transition: border-color 0.2s; outline: none;
+        }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); }
+        .form-group textarea { resize: vertical; min-height: 120px; }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--bg2); border-top: 1px solid var(--border);
+            padding: 40px 2rem; text-align: center;
+        }
+        footer p { font-size: 0.85rem; color: var(--muted); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+            .hero-visual { display: none; }
+            nav .nav-links { display: none; }
+        }
+
+        /* ── ANIMATIONS ── */
+        .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* Floating orbs BG */
+        .orb {
+            position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: -1;
+        }
+        .orb1 { width: 400px; height: 400px; background: rgba(108,99,255,0.08); top: -100px; right: -100px; }
+        .orb2 { width: 300px; height: 300px; background: rgba(0,212,170,0.06); bottom: 200px; left: -100px; }
     </style>
 </head>
-<body class="smooth-scroll">
-    <!-- Scene 3D en arrière-plan -->
-    <div id="scene-3d" class="scene-3d"></div>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
 
-    <!-- Barre de navigation -->
-    <nav class="fixed w-full z-50 nav-bg shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center">
-                    <div class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-                        MOHAMMED AMINE BAICH
+<!-- NAV -->
+<nav>
+    <div class="nav-logo">BAICH</div>
+    <ul class="nav-links">
+        <li><a href="#skills" data-fr="Compétences" data-en="Skills">Compétences</a></li>
+        <li><a href="#projects" data-fr="Projets" data-en="Projects">Projets</a></li>
+        <li><a href="#experience" data-fr="Expérience" data-en="Experience">Expérience</a></li>
+        <li><a href="#education" data-fr="Formation" data-en="Education">Formation</a></li>
+        <li><a href="#contact" data-fr="Contact" data-en="Contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+        <button class="nav-btn" id="lang-toggle">EN</button>
+        <button class="nav-btn" id="theme-toggle">☀</button>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+    <div class="hero-grid container">
+        <div class="fade-in">
+            <div class="hero-tag" data-fr="Disponible · Oran, Algérie" data-en="Available · Oran, Algeria">Disponible · Oran, Algérie</div>
+            <h1>
+                <span data-fr="Développeur" data-en="Full-Stack">Développeur</span><br>
+                <span data-fr="Full-Stack & IA" data-en="Developer & AI">Full-Stack & IA</span>
+            </h1>
+            <p class="hero-desc" data-fr="Flutter · Django · React · Machine Learning. Je conçois des applications industrielles modernes, des systèmes prédictifs et des solutions cross-platform pour le monde réel." data-en="Flutter · Django · React · Machine Learning. I build modern industrial apps, predictive systems and cross-platform solutions for the real world.">
+                Flutter · Django · React · Machine Learning. Je conçois des applications industrielles modernes, des systèmes prédictifs et des solutions cross-platform pour le monde réel.
+            </p>
+            <div class="hero-btns">
+                <a href="#projects" class="btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    <span data-fr="Voir mes projets" data-en="View projects">Voir mes projets</span>
+                </a>
+                <a href="#contact" class="btn-secondary">
+                    <i class="fas fa-envelope"></i>
+                    <span data-fr="Me contacter" data-en="Contact me">Me contacter</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-visual fade-in" style="animation-delay:0.2s">
+            <div class="hero-card-stack">
+                <div class="hc hc-back"></div>
+                <div class="hc hc-mid"></div>
+                <div class="hc hc-front">
+                    <div>
+                        <div class="hc-avatar">MB</div>
+                        <div class="hc-name" style="margin-top:12px">Mohammed Amine Baich</div>
+                        <div class="hc-role" data-fr="Full-Stack · IA · Mobile" data-en="Full-Stack · AI · Mobile">Full-Stack · IA · Mobile</div>
+                    </div>
+                    <div class="hc-tags">
+                        <span class="hc-tag">Flutter</span>
+                        <span class="hc-tag">Django</span>
+                        <span class="hc-tag">React</span>
+                        <span class="hc-tag">XGBoost</span>
+                        <span class="hc-tag">Odoo</span>
+                    </div>
+                    <div class="hc-stats">
+                        <div class="hc-stat">
+                            <div class="hc-stat-num" style="color:var(--accent)">4+</div>
+                            <div class="hc-stat-lbl" data-fr="Ans d'exp." data-en="Years exp.">Ans d'exp.</div>
+                        </div>
+                        <div class="hc-stat">
+                            <div class="hc-stat-num" style="color:var(--accent2)">12+</div>
+                            <div class="hc-stat-lbl" data-fr="Projets" data-en="Projects">Projets</div>
+                        </div>
+                        <div class="hc-stat">
+                            <div class="hc-stat-num" style="color:var(--accent3)">Msc</div>
+                            <div class="hc-stat-lbl">IA/ML</div>
+                        </div>
+                        <div class="hc-stat">
+                            <div class="hc-stat-num" style="color:var(--accent2)">3</div>
+                            <div class="hc-stat-lbl" data-fr="Langues" data-en="Languages">Langues</div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-                <!-- Liens de navigation -->
-                <div class="hidden md:flex space-x-8">
-                    <a href="#about" class="px-3 py-2 font-medium hover:text-purple-600 transition" data-text-fr="À propos" data-text-en="About">À propos</a>
-                    <a href="#skills" class="px-3 py-2 font-medium hover:text-purple-600 transition" data-text-fr="Compétences" data-text-en="Skills">Compétences</a>
-                    <a href="#projects" class="px-3 py-2 font-medium hover:text-purple-600 transition" data-text-fr="Projets" data-text-en="Projects">Projets</a>
-                    <a href="#experience" class="px-3 py-2 font-medium hover:text-purple-600 transition" data-text-fr="Expérience" data-text-en="Experience">Expérience</a>
-                    <a href="#contact" class="px-3 py-2 font-medium hover:text-purple-600 transition" data-text-fr="Contact" data-text-en="Contact">Contact</a>
+<!-- SKILLS -->
+<section id="skills" style="background:var(--bg2)">
+    <div class="container">
+        <div class="sec-header fade-in">
+            <div class="sec-eyebrow" data-fr="Ce que je maîtrise" data-en="What I master">Ce que je maîtrise</div>
+            <h2 class="sec-title" data-fr="Compétences" data-en="Skills">Compétences</h2>
+            <div class="sec-line"></div>
+        </div>
+        <div class="skills-grid">
+            <div class="skill-card fade-in">
+                <div class="skill-icon" style="background:rgba(0,120,255,0.12)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32"><polyline points="15.383 18.316 18.744 15.042 27.093 15.042 19.697 22.438 15.383 18.316" style="fill:#40d0fd"/><polygon points="4.907 16.125 9.106 20.424 27.093 2.287 18.744 2.287 4.907 16.125" style="fill:#41d0fd"/><polygon points="11.176 22.479 15.435 26.675 19.697 22.438 15.383 18.316 11.176 22.479" style="fill:#1fbcfd"/><polygon points="15.435 26.675 19.697 22.438 26.989 29.813 18.593 29.813 15.435 26.675" style="fill:#095a9d"/></svg>
                 </div>
+                <h3>Flutter / Dart</h3>
+                <p data-fr="Apps cross-platform Mobile, Web et Desktop avec GetX, Dio, Firebase, FCM." data-en="Cross-platform Mobile, Web and Desktop apps with GetX, Dio, Firebase, FCM.">Apps cross-platform Mobile, Web et Desktop avec GetX, Dio, Firebase, FCM.</p>
+                <div class="badges">
+                    <span class="badge" style="background:rgba(0,120,255,0.12);color:#40d0fd">Mobile</span>
+                    <span class="badge" style="background:rgba(0,120,255,0.12);color:#40d0fd">Web</span>
+                    <span class="badge" style="background:rgba(0,120,255,0.12);color:#40d0fd">GetX</span>
+                    <span class="badge" style="background:rgba(0,120,255,0.12);color:#40d0fd">Firebase</span>
+                </div>
+            </div>
 
-                <!-- Boutons droite -->
-                <div class="flex items-center space-x-4">
-                    <!-- Dark/Light mode -->
-                    <button id="theme-toggle" class="theme-toggle btn-hover">
-                        <i id="theme-icon" class="fas fa-moon theme-icon"></i>
+            <div class="skill-card fade-in">
+                <div class="skill-icon" style="background:rgba(0,180,80,0.12)">
+                    <i class="fab fa-python" style="color:#3fb950;font-size:1.6rem"></i>
+                </div>
+                <h3>Django / DRF</h3>
+                <p data-fr="APIs REST robustes, JWT auth, PostgreSQL, SQL Server, déploiement Ubuntu Server." data-en="Robust REST APIs, JWT auth, PostgreSQL, SQL Server, Ubuntu Server deployment.">APIs REST robustes, JWT auth, PostgreSQL, SQL Server, déploiement Ubuntu Server.</p>
+                <div class="badges">
+                    <span class="badge" style="background:rgba(0,180,80,0.12);color:#3fb950">DRF</span>
+                    <span class="badge" style="background:rgba(0,180,80,0.12);color:#3fb950">JWT</span>
+                    <span class="badge" style="background:rgba(0,180,80,0.12);color:#3fb950">PostgreSQL</span>
+                    <span class="badge" style="background:rgba(0,180,80,0.12);color:#3fb950">REST API</span>
+                </div>
+            </div>
+
+            <div class="skill-card fade-in">
+                <div class="skill-icon" style="background:rgba(108,99,255,0.12)">
+                    <i class="fas fa-brain" style="color:var(--accent);font-size:1.5rem"></i>
+                </div>
+                <h3 data-fr="Machine Learning / IA" data-en="Machine Learning / AI">Machine Learning / IA</h3>
+                <p data-fr="Modèles XGBoost, séries temporelles, MLPipeline Scikit-learn. Master en IA appliquée." data-en="XGBoost models, time series, Scikit-learn MLPipeline. Master's in Applied AI.">Modèles XGBoost, séries temporelles, MLPipeline Scikit-learn. Master en IA appliquée.</p>
+                <div class="badges">
+                    <span class="badge" style="background:rgba(108,99,255,0.12);color:var(--accent)">XGBoost</span>
+                    <span class="badge" style="background:rgba(108,99,255,0.12);color:var(--accent)">Sklearn</span>
+                    <span class="badge" style="background:rgba(108,99,255,0.12);color:var(--accent)">Pandas</span>
+                    <span class="badge" style="background:rgba(108,99,255,0.12);color:var(--accent)">NLP</span>
+                </div>
+            </div>
+
+            <div class="skill-card fade-in">
+                <div class="skill-icon" style="background:rgba(0,212,170,0.12)">
+                    <i class="fab fa-react" style="color:var(--accent2);font-size:1.6rem"></i>
+                </div>
+                <h3>React / Web</h3>
+                <p data-fr="Dashboards React avec TailwindCSS, Context API, Axios, React Router. HTML/CSS/JS." data-en="React dashboards with TailwindCSS, Context API, Axios, React Router. HTML/CSS/JS.">Dashboards React avec TailwindCSS, Context API, Axios, React Router. HTML/CSS/JS.</p>
+                <div class="badges">
+                    <span class="badge" style="background:rgba(0,212,170,0.12);color:var(--accent2)">React</span>
+                    <span class="badge" style="background:rgba(0,212,170,0.12);color:var(--accent2)">TailwindCSS</span>
+                    <span class="badge" style="background:rgba(0,212,170,0.12);color:var(--accent2)">JavaScript</span>
+                </div>
+            </div>
+
+            <div class="skill-card fade-in">
+                <div class="skill-icon" style="background:rgba(255,107,107,0.12)">
+                    <i class="fas fa-database" style="color:var(--accent3);font-size:1.4rem"></i>
+                </div>
+                <h3 data-fr="Bases de données" data-en="Databases">Bases de données</h3>
+                <p data-fr="PostgreSQL, SQL Server, MariaDB, SQLite. Requêtes complexes, JOIN temporels, reporting." data-en="PostgreSQL, SQL Server, MariaDB, SQLite. Complex queries, temporal JOINs, reporting.">PostgreSQL, SQL Server, MariaDB, SQLite. Requêtes complexes, JOIN temporels, reporting.</p>
+                <div class="badges">
+                    <span class="badge" style="background:rgba(255,107,107,0.12);color:var(--accent3)">PostgreSQL</span>
+                    <span class="badge" style="background:rgba(255,107,107,0.12);color:var(--accent3)">SQL Server</span>
+                    <span class="badge" style="background:rgba(255,107,107,0.12);color:var(--accent3)">MariaDB</span>
+                </div>
+            </div>
+
+            <div class="skill-card fade-in">
+                <div class="skill-icon" style="background:rgba(255,180,0,0.12)">
+                    <i class="fas fa-cogs" style="color:#f0a500;font-size:1.4rem"></i>
+                </div>
+                <h3>ERP / DevOps</h3>
+                <p data-fr="Administration Odoo Enterprise, scripts Python/XML. Ubuntu Server, systemd, cPanel, Git." data-en="Odoo Enterprise administration, Python/XML scripts. Ubuntu Server, systemd, cPanel, Git.">Administration Odoo Enterprise, scripts Python/XML. Ubuntu Server, systemd, cPanel, Git.</p>
+                <div class="badges">
+                    <span class="badge" style="background:rgba(255,180,0,0.12);color:#f0a500">Odoo</span>
+                    <span class="badge" style="background:rgba(255,180,0,0.12);color:#f0a500">Ubuntu</span>
+                    <span class="badge" style="background:rgba(255,180,0,0.12);color:#f0a500">Git</span>
+                    <span class="badge" style="background:rgba(255,180,0,0.12);color:#f0a500">systemd</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+    <div class="container">
+        <div class="sec-header fade-in">
+            <div class="sec-eyebrow" data-fr="Ce que j'ai construit" data-en="What I've built">Ce que j'ai construit</div>
+            <h2 class="sec-title" data-fr="Projets réels" data-en="Real Projects">Projets réels</h2>
+            <div class="sec-line"></div>
+        </div>
+
+        <div class="projects-grid">
+
+            <!-- FEATURED: Predictive Maintenance -->
+            <div class="proj-card proj-featured fade-in">
+                <div class="proj-header" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)">
+                    <div style="text-align:center;padding:32px;z-index:1;">
+                        <i class="fas fa-microchip" style="font-size:4rem;color:#6c63ff;display:block;margin-bottom:16px"></i>
+                        <div style="background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);border-radius:12px;padding:12px 20px;display:inline-block">
+                            <span style="font-size:0.8rem;color:#a89fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700">XGBoost · Time Series · AUC &gt; 0.90</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="proj-body">
+                    <div class="proj-type" data-fr="🤖 Machine Learning · PLASTPAPER" data-en="🤖 Machine Learning · PLASTPAPER">🤖 Machine Learning · PLASTPAPER</div>
+                    <h3 data-fr="Système de Maintenance Prédictive" data-en="Predictive Maintenance System">Système de Maintenance Prédictive</h3>
+                    <p data-fr="Modèle ML (XGBoost + séries temporelles) entraîné sur l'historique des pannes machines. Prédit les arrêts imminents avec leur raison probable (justification). App mobile Flutter pour opérateurs + backend Django REST. Cross-validation temporelle pour éviter la fuite de données." data-en="ML model (XGBoost + time series) trained on machine failure history. Predicts imminent stoppages and probable root cause. Flutter mobile app for operators + Django REST backend. Temporal cross-validation to prevent data leakage.">
+                        Modèle ML (XGBoost + séries temporelles) entraîné sur l'historique des pannes machines. Prédit les arrêts imminents avec leur raison probable (justification). App mobile Flutter pour opérateurs + backend Django REST. Cross-validation temporelle pour éviter la fuite de données.
+                    </p>
+                    <div class="proj-tags">
+                        <span class="proj-tag">Python</span>
+                        <span class="proj-tag">XGBoost</span>
+                        <span class="proj-tag">Pandas</span>
+                        <span class="proj-tag">Django REST</span>
+                        <span class="proj-tag">Flutter</span>
+                        <span class="proj-tag">MySQL</span>
+                        <span class="proj-tag" data-fr="Séries temporelles" data-en="Time Series" style="color:var(--accent)">Séries temporelles</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory System -->
+            <div class="proj-card fade-in">
+                <div class="proj-header" style="background:linear-gradient(135deg,#0f2027,#203a43,#2c5364)">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <div class="proj-body">
+                    <div class="proj-type" data-fr="📦 ERP · Inventaire · PLASTPAPER" data-en="📦 ERP · Inventory · PLASTPAPER">📦 ERP · Inventaire · PLASTPAPER</div>
+                    <h3 data-fr="Système d'Inventaire Multi-plateforme" data-en="Multi-platform Inventory System">Système d'Inventaire Multi-plateforme</h3>
+                    <p data-fr="Gestion des produits finis, semi-finis, emballages et matières premières pour les GDS. App mobile Flutter + dashboard React + backend Django. JWT auth, modèle InventaireVerification custom, APIs REST complètes." data-en="Management of finished goods, semi-finished products, packaging and raw materials for supermarkets. Flutter mobile app + React dashboard + Django backend. JWT auth, custom InventaireVerification model, full REST APIs.">
+                        Gestion des produits finis, semi-finis, emballages et matières premières pour les GDS. App mobile Flutter + dashboard React + backend Django. JWT auth, modèle InventaireVerification custom, APIs REST complètes.
+                    </p>
+                    <div class="proj-tags">
+                        <span class="proj-tag">Flutter</span>
+                        <span class="proj-tag">React</span>
+                        <span class="proj-tag">Django DRF</span>
+                        <span class="proj-tag">JWT</span>
+                        <span class="proj-tag">PostgreSQL</span>
+                        <span class="proj-tag">TailwindCSS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASVES -->
+            <div class="proj-card fade-in">
+                <div class="proj-header" style="background:linear-gradient(135deg,#134e5e,#71b280)">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+                <div class="proj-body">
+                    <div class="proj-type" data-fr="🌐 Site Web · Médical · Algérie" data-en="🌐 Website · Medical · Algeria">🌐 Site Web · Médical · Algérie</div>
+                    <h3>ASVES – asves-dz.com</h3>
+                    <p data-fr="Site web institutionnel pour la société ASVES, plateforme pour chercheurs et médecins algériens. Design moderne, contenu structuré, optimisé pour le web." data-en="Institutional website for ASVES, a platform for Algerian researchers and physicians. Modern design, structured content, web-optimized.">
+                        Site web institutionnel pour la société ASVES, plateforme pour chercheurs et médecins algériens. Design moderne, contenu structuré, optimisé pour le web.
+                    </p>
+                    <div class="proj-tags">
+                        <span class="proj-tag">Django</span>
+                        <span class="proj-tag">TailwindCSS</span>
+                        <span class="proj-tag">HTML/CSS</span>
+                        <span class="proj-tag">cPanel</span>
+                    </div>
+                    <a href="https://asves-dz.com" target="_blank" class="proj-link">
+                        <span data-fr="Visiter le site" data-en="Visit website">Visiter le site</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- KEBA Machine Monitoring -->
+            <div class="proj-card fade-in">
+                <div class="proj-header" style="background:linear-gradient(135deg,#1f1c2c,#928dab)">
+                    <i class="fas fa-industry"></i>
+                </div>
+                <div class="proj-body">
+                    <div class="proj-type" data-fr="⚙️ Automation · Temps réel · PLASTPAPER" data-en="⚙️ Automation · Real-time · PLASTPAPER">⚙️ Automation · Temps réel · PLASTPAPER</div>
+                    <h3 data-fr="Monitoring Machine KEBA KePlast" data-en="KEBA KePlast Machine Monitoring">Monitoring Machine KEBA KePlast</h3>
+                    <p data-fr="Dashboard Python temps réel pour machines d'injection plastique KEBA KePlast. Reverse-engineering du protocole HTTP API propriétaire, gestion SSL/TLS legacy, authentification POST /login + cookies. Historique arrêts/redémarrages." data-en="Real-time Python dashboard for KEBA KePlast plastic injection machines. Reverse-engineering of proprietary HTTP API protocol, legacy SSL/TLS handling, POST /login + cookies auth. Downtime/uptime history.">
+                        Dashboard Python temps réel pour machines d'injection plastique KEBA KePlast. Reverse-engineering du protocole HTTP API propriétaire, gestion SSL/TLS legacy, authentification POST /login + cookies. Historique arrêts/redémarrages.
+                    </p>
+                    <div class="proj-tags">
+                        <span class="proj-tag">Python</span>
+                        <span class="proj-tag">HTTP API</span>
+                        <span class="proj-tag">SSL/TLS</span>
+                        <span class="proj-tag" data-fr="Temps réel" data-en="Real-time">Temps réel</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HomeLife -->
+            <div class="proj-card fade-in">
+                <div class="proj-header" style="background:linear-gradient(135deg,#f953c6,#b91d73)">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <div class="proj-body">
+                    <div class="proj-type" data-fr="🛍️ E-commerce · B2B" data-en="🛍️ E-commerce · B2B">🛍️ E-commerce · B2B</div>
+                    <h3>HomeLife / HomeLife Pro</h3>
+                    <p data-fr="Site Django+TailwindCSS + app Flutter pour commandes en ligne B2B. Distributeurs, grossistes, mini-markets, hypermarchés. Gestion catalogue, commandes, livraisons." data-en="Django+TailwindCSS site + Flutter app for B2B online ordering. Distributors, wholesalers, mini-markets, hypermarkets. Catalog, order, delivery management.">
+                        Site Django+TailwindCSS + app Flutter pour commandes en ligne B2B. Distributeurs, grossistes, mini-markets, hypermarchés. Gestion catalogue, commandes, livraisons.
+                    </p>
+                    <div class="proj-tags">
+                        <span class="proj-tag">Django</span>
+                        <span class="proj-tag">TailwindCSS</span>
+                        <span class="proj-tag">Flutter</span>
+                        <span class="proj-tag">REST API</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Felanout -->
+            <div class="proj-card fade-in">
+                <div class="proj-header" style="background:linear-gradient(135deg,#f7971e,#ffd200)">
+                    <i class="fas fa-utensils" style="color:#333"></i>
+                </div>
+                <div class="proj-body">
+                    <div class="proj-type" data-fr="🍔 Food Tech · MCS Technology" data-en="🍔 Food Tech · MCS Technology">🍔 Food Tech · MCS Technology</div>
+                    <h3>Felanout App</h3>
+                    <p data-fr="Plateforme mobile de commande de repas promotionnels avec 3 apps (Client, Restaurateur, Manager). Gestion des remises, fidélité clients, suivi commandes en temps réel." data-en="Mobile platform for ordering promotional meals with 3 apps (Customer, Restaurant Owner, Manager). Discount management, loyalty programs, real-time order tracking.">
+                        Plateforme mobile de commande de repas promotionnels avec 3 apps (Client, Restaurateur, Manager). Gestion des remises, fidélité clients, suivi commandes en temps réel.
+                    </p>
+                    <div class="proj-tags">
+                        <span class="proj-tag">Flutter</span>
+                        <span class="proj-tag">Firebase</span>
+                        <span class="proj-tag">Dart</span>
+                        <span class="proj-tag" data-fr="3 apps" data-en="3 apps">3 apps</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Odoo Automation -->
+            <div class="proj-card fade-in">
+                <div class="proj-header" style="background:linear-gradient(135deg,#232526,#414345)">
+                    <i class="fas fa-file-excel" style="color:#21a366"></i>
+                </div>
+                <div class="proj-body">
+                    <div class="proj-type" data-fr="📊 Automation Python · PLASTPAPER" data-en="📊 Python Automation · PLASTPAPER">📊 Automation Python · PLASTPAPER</div>
+                    <h3 data-fr="Rapports & Automatisation Odoo" data-en="Odoo Reports & Automation">Rapports & Automatisation Odoo</h3>
+                    <p data-fr="Scripts Python RPC Odoo pour gestion des achats/factures. Rapports Excel quotidiens CA (xlsxwriter + SQL Server). Dashboard contrôle achats openpyxl. Automatisation pfSense via SSH (paramiko)." data-en="Python Odoo RPC scripts for purchase/invoice management. Daily Excel revenue reports (xlsxwriter + SQL Server). Purchase control dashboard with openpyxl. pfSense automation via SSH (paramiko).">
+                        Scripts Python RPC Odoo pour gestion des achats/factures. Rapports Excel quotidiens CA (xlsxwriter + SQL Server). Dashboard contrôle achats openpyxl. Automatisation pfSense via SSH (paramiko).
+                    </p>
+                    <div class="proj-tags">
+                        <span class="proj-tag">Python</span>
+                        <span class="proj-tag">Odoo RPC</span>
+                        <span class="proj-tag">xlsxwriter</span>
+                        <span class="proj-tag">openpyxl</span>
+                        <span class="proj-tag">paramiko</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fennec Invest -->
+            <div class="proj-card fade-in">
+                <div class="proj-header" style="background:linear-gradient(135deg,#141e30,#243b55)">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="proj-body">
+                    <div class="proj-type" data-fr="💹 FinTech · MCS Technology" data-en="💹 FinTech · MCS Technology">💹 FinTech · MCS Technology</div>
+                    <h3>Fennec Invest</h3>
+                    <p data-fr="Application mobile Flutter pour le trading et l'investissement en cryptomonnaies. Suivi de portefeuille, graphiques temps réel, authentification sécurisée." data-en="Flutter mobile app for cryptocurrency trading and investment. Portfolio tracking, real-time charts, secure authentication.">
+                        Application mobile Flutter pour le trading et l'investissement en cryptomonnaies. Suivi de portefeuille, graphiques temps réel, authentification sécurisée.
+                    </p>
+                    <div class="proj-tags">
+                        <span class="proj-tag">Flutter</span>
+                        <span class="proj-tag">Dart</span>
+                        <span class="proj-tag" data-fr="Crypto" data-en="Crypto">Crypto</span>
+                        <span class="proj-tag">REST API</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience" style="background:var(--bg2)">
+    <div class="container">
+        <div class="sec-header fade-in">
+            <div class="sec-eyebrow" data-fr="Parcours professionnel" data-en="Professional path">Parcours professionnel</div>
+            <h2 class="sec-title" data-fr="Expérience" data-en="Experience">Expérience</h2>
+            <div class="sec-line"></div>
+        </div>
+        <div class="exp-timeline">
+
+            <div class="exp-item fade-in">
+                <div class="exp-dot-wrap"><div class="exp-dot" style="background:var(--accent2)"></div></div>
+                <div class="exp-card">
+                    <div class="exp-top">
+                        <div class="exp-company">SPA PLASTPAPER</div>
+                        <span class="exp-date">2024 – <span data-fr="Présent" data-en="Present">Présent</span></span>
+                    </div>
+                    <div class="exp-role" data-fr="IT Support & Développeur Full-Stack" data-en="IT Support & Full-Stack Developer">IT Support & Développeur Full-Stack</div>
+                    <ul class="exp-items">
+                        <li data-fr="App mobile production : palettisation, consommation matière, contrôle qualité, localisation moules" data-en="Production mobile app: palletization, material consumption, quality control, mold localization">App mobile production : palettisation, consommation matière, contrôle qualité, localisation moules</li>
+                        <li data-fr="Système d'inventaire multi-plateforme (Flutter + React + Django) pour GDS" data-en="Multi-platform inventory system (Flutter + React + Django) for supermarkets">Système d'inventaire multi-plateforme (Flutter + React + Django) pour GDS</li>
+                        <li data-fr="Maintenance prédictive : modèle XGBoost sur séries temporelles d'historique pannes" data-en="Predictive maintenance: XGBoost model on machine failure time series">Maintenance prédictive : modèle XGBoost sur séries temporelles d'historique pannes</li>
+                        <li data-fr="Monitoring temps réel machines KEBA KePlast (reverse-engineering API propriétaire)" data-en="Real-time monitoring of KEBA KePlast machines (proprietary API reverse-engineering)">Monitoring temps réel machines KEBA KePlast (reverse-engineering API propriétaire)</li>
+                        <li data-fr="Administration Odoo Enterprise + scripts Python RPC, rapports Excel automatisés" data-en="Odoo Enterprise administration + Python RPC scripts, automated Excel reports">Administration Odoo Enterprise + scripts Python RPC, rapports Excel automatisés</li>
+                        <li data-fr="Apps Web Work Permits, Work Orders, Prodify (full-stack)" data-en="Web apps Work Permits, Work Orders, Prodify (full-stack)">Apps Web Work Permits, Work Orders, Prodify (full-stack)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="exp-item fade-in">
+                <div class="exp-dot-wrap"><div class="exp-dot"></div></div>
+                <div class="exp-card">
+                    <div class="exp-top">
+                        <div class="exp-company">MCS Technology</div>
+                        <span class="exp-date">2022 – 2024</span>
+                    </div>
+                    <div class="exp-role" data-fr="Développeur Frontend (Flutter)" data-en="Frontend Developer (Flutter)">Développeur Frontend (Flutter)</div>
+                    <ul class="exp-items">
+                        <li>Fennec Invest – <span data-fr="App crypto mobile Flutter" data-en="Flutter mobile crypto app">App crypto mobile Flutter</span></li>
+                        <li>SAFHADID Weighbridge – <span data-fr="App desktop/mobile liée à un pont-bascule COM port" data-en="Desktop/mobile app connected to weighbridge COM port">App desktop/mobile liée à un pont-bascule COM port</span></li>
+                        <li>Felanout – <span data-fr="Plateforme repas 3 apps (Client / Restaurateur / Manager)" data-en="Meal platform 3 apps (Customer / Restaurant / Manager)">Plateforme repas 3 apps (Client / Restaurateur / Manager)</span></li>
+                        <li>PlastPaper Production – <span data-fr="App mobile gestion production, moules, maintenance" data-en="Mobile app for production, molds and maintenance management">App mobile gestion production, moules, maintenance</span></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+    <div class="container">
+        <div class="sec-header fade-in">
+            <div class="sec-eyebrow" data-fr="Diplômes & Formation" data-en="Degrees & Education">Diplômes & Formation</div>
+            <h2 class="sec-title" data-fr="Formation" data-en="Education">Formation</h2>
+            <div class="sec-line"></div>
+        </div>
+        <div class="edu-grid">
+            <div class="edu-card fade-in">
+                <div class="edu-year">2020 – 2022</div>
+                <div class="edu-degree" data-fr="Master en Intelligence Artificielle et ses Applications" data-en="Master's in Artificial Intelligence and its Applications">Master en Intelligence Artificielle et ses Applications</div>
+                <div class="edu-school">Université des Sciences et de la Technologie – Oran MB</div>
+            </div>
+            <div class="edu-card fade-in">
+                <div class="edu-year">2019 – 2020</div>
+                <div class="edu-degree" data-fr="Licence en Informatique – Systèmes d'Information" data-en="Bachelor's in Computer Science – Information Systems">Licence en Informatique – Systèmes d'Information</div>
+                <div class="edu-school">Université des Sciences et de la Technologie – Oran MB</div>
+            </div>
+            <div class="edu-card fade-in">
+                <div class="edu-year">2016</div>
+                <div class="edu-degree" data-fr="Baccalauréat Scientifique" data-en="Scientific Baccalaureate">Baccalauréat Scientifique</div>
+                <div class="edu-school">Lycée Mhadji Raho, Oran</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" style="background:var(--bg2)">
+    <div class="container">
+        <div class="sec-header fade-in">
+            <div class="sec-eyebrow" data-fr="Travaillons ensemble" data-en="Let's work together">Travaillons ensemble</div>
+            <h2 class="sec-title" data-fr="Contact" data-en="Contact">Contact</h2>
+            <div class="sec-line"></div>
+        </div>
+        <div class="contact-wrap fade-in">
+            <div class="contact-info">
+                <h3 data-fr="Discutons de votre projet" data-en="Let's discuss your project">Discutons de votre projet</h3>
+                <p data-fr="Disponible pour des missions freelance, collaborations ou opportunités professionnelles. Basé à Oran, Algérie." data-en="Available for freelance missions, collaborations or professional opportunities. Based in Oran, Algeria.">
+                    Disponible pour des missions freelance, collaborations ou opportunités professionnelles. Basé à Oran, Algérie.
+                </p>
+                <div class="contact-item">
+                    <div class="contact-icon" style="background:rgba(108,99,255,0.12)">
+                        <i class="fas fa-envelope" style="color:var(--accent)"></i>
+                    </div>
+                    <a href="mailto:aminebaich116@gmail.com">aminebaich116@gmail.com</a>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon" style="background:rgba(0,212,170,0.12)">
+                        <i class="fas fa-phone-alt" style="color:var(--accent2)"></i>
+                    </div>
+                    <a href="tel:+213770089276">+213 770 089 276</a>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon" style="background:rgba(255,107,107,0.12)">
+                        <i class="fas fa-map-marker-alt" style="color:var(--accent3)"></i>
+                    </div>
+                    <span data-fr="11 Chakib Arslan, Oran, Algérie" data-en="11 Chakib Arslan Ave, Oran, Algeria">11 Chakib Arslan, Oran, Algérie</span>
+                </div>
+                <div class="socials">
+                    <a href="#" class="social-btn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-btn"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+                    <a href="mailto:aminebaich116@gmail.com" class="social-btn"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <div class="contact-form">
+                    <div class="form-group">
+                        <label data-fr="Nom complet" data-en="Full name">Nom complet</label>
+                        <input type="text" id="f-name" placeholder="Mohammed Amine …">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="f-email" placeholder="votre@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="f-msg" placeholder="Votre message …"></textarea>
+                    </div>
+                    <button class="btn-primary" id="f-submit" style="width:100%;justify-content:center">
+                        <i class="fas fa-paper-plane"></i>
+                        <span data-fr="Envoyer" data-en="Send">Envoyer</span>
                     </button>
-
-                    <!-- Sélecteur de langue -->
-                    <div class="relative">
-                        <button id="language-toggle" class="language-switcher p-2 rounded-full btn-hover transition flex items-center">
-                            <span id="current-lang" class="mr-1">FR</span>
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </button>
-                        <div id="language-dropdown" class="language-dropdown absolute right-0 mt-2 w-24 rounded-md shadow-lg py-1">
-                            <button data-lang="fr" class="block w-full text-left px-4 py-2 btn-hover transition">Français</button>
-                            <button data-lang="en" class="block w-full text-left px-4 py-2 btn-hover transition">English</button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
-    </nav>
+    </div>
+</section>
 
-    <!-- Hero Section -->
-    <section class="min-h-screen flex items-center pt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div class="space-y-6">
-                    <h1 class="text-5xl md:text-6xl font-bold leading-tight">
-                        <span class="bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent" data-text-fr="Développeur Full-Stack" data-text-en="Full-Stack Developer">Développeur Full-Stack</span>
-                    </h1>
-                    <p class="text-xl" data-text-fr="Spécialisé en développement mobile avec Flutter et backend avec Django. Diplômé en systèmes d'information et master en intelligence artificielle." data-text-en="Specialized in mobile development with Flutter and backend with Django. Graduate in information systems and master's in artificial intelligence.">
-                        Spécialisé en développement mobile avec Flutter et backend avec Django. Diplômé en systèmes d'information et master en intelligence artificielle.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#contact" class="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition" data-text-fr="Me contacter" data-text-en="Contact me">
-                            Me contacter
-                        </a>
-                        <a href="#projects" class="border-2 border-purple-600 text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition" data-text-fr="Voir mes projets" data-text-en="View my projects">
-                            Voir mes projets
-                        </a>
-                    </div>
-                </div>
-                <div class="relative">
-                    <div class="relative w-full h-96 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl overflow-hidden shadow-2xl">
-                        <!-- Animation 3D ou illustration -->
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <i class="fas fa-mobile-alt text-white text-8xl opacity-30"></i>
-                            <i class="fas fa-server text-white text-6xl opacity-30 absolute top-1/4 right-1/4"></i>
-                            <i class="fas fa-robot text-white text-5xl opacity-30 absolute bottom-1/4 left-1/4"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 Mohammed Amine Baich — <span data-fr="Tous droits réservés" data-en="All rights reserved">Tous droits réservés</span></p>
+</footer>
 
-    <!-- À propos -->
-    <section id="about" class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold" data-text-fr="À propos de moi" data-text-en="About me">
-                    À propos de moi
-                </h2>
-                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
-            </div>
+<script>
+    // ── THEME ──
+    let theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+    applyTheme(theme);
+    function applyTheme(t) {
+        theme = t;
+        document.documentElement.setAttribute('data-theme', t);
+        document.getElementById('theme-toggle').textContent = t === 'dark' ? '☀' : '🌙';
+        localStorage.setItem('theme', t);
+    }
+    document.getElementById('theme-toggle').addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
 
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="card p-8 rounded-xl shadow-lg hover:shadow-xl transition">
-                    <div class="text-purple-600 text-4xl mb-4">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3" data-text-fr="Formation" data-text-en="Education">
-                        Formation
-                    </h3>
-                    <p data-text-fr="Licence en Systèmes d'Information et Master en Intelligence Artificielle et ses applications." data-text-en="Bachelor's in Information Systems and Master's in Artificial Intelligence and its applications.">
-                        Licence en Systèmes d'Information et Master en Intelligence Artificielle et ses applications.
-                    </p>
-                </div>
+    // ── LANGUAGE ──
+    let lang = localStorage.getItem('lang') || 'fr';
+    applyLang(lang);
+    function applyLang(l) {
+        lang = l;
+        document.documentElement.setAttribute('lang', l);
+        document.getElementById('lang-toggle').textContent = l === 'fr' ? 'EN' : 'FR';
+        document.querySelectorAll('[data-fr]').forEach(el => {
+            el.textContent = l === 'fr' ? el.getAttribute('data-fr') : el.getAttribute('data-en');
+        });
+        localStorage.setItem('lang', l);
+    }
+    document.getElementById('lang-toggle').addEventListener('click', () => applyLang(lang === 'fr' ? 'en' : 'fr'));
 
-                <div class="card p-8 rounded-xl shadow-lg hover:shadow-xl transition">
-                    <div class="text-purple-600 text-4xl mb-4">
-                        <i class="fas fa-briefcase"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3" data-text-fr="Expérience" data-text-en="Experience">
-                        Expérience
-                    </h3>
-                    <p data-text-fr="Développeur chez MCS Technology et PlastPaper, avec plusieurs projets réalisés en Flutter et Django." data-text-en="Developer at MCS Technology and PlastPaper, with several projects completed in Flutter and Django.">
-                        Développeur chez MCS Technology et PlastPaper, avec plusieurs projets réalisés en Flutter et Django.
-                    </p>
-                </div>
-
-                <div class="card p-8 rounded-xl shadow-lg hover:shadow-xl transition">
-                    <div class="text-purple-600 text-4xl mb-4">
-                        <i class="fas fa-code"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3" data-text-fr="Expertise" data-text-en="Expertise">
-                        Expertise
-                    </h3>
-                    <p data-text-fr="Développement mobile (Flutter), desktop, web et backend (Django). Applications d'IA et solutions innovantes." data-text-en="Mobile development (Flutter), desktop, web and backend (Django). AI applications and innovative solutions.">
-                        Développement mobile (Flutter), desktop, web et backend (Django). Applications d'IA et solutions innovantes.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Compétences -->
-    <section id="skills" class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold" data-text-fr="Mes Compétences" data-text-en="My Skills">
-                    Mes Compétences
-                </h2>
-                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Flutter -->
-                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-blue-100 p-3 rounded-full mr-4">
-                            <i class="text-blue-600 text-2xl">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 32 32"><polyline points="15.383 18.316 18.744 15.042 27.093 15.042 19.697 22.438 15.383 18.316 15.383 18.316 15.383 18.316 15.383 18.316 15.383 18.316" style="fill:#40d0fd"/><polygon points="4.907 16.125 9.106 20.424 27.093 2.287 18.744 2.287 4.907 16.125" style="fill:#41d0fd;isolation:isolate"/><polygon points="11.176 22.479 15.435 26.675 19.697 22.438 15.383 18.316 11.176 22.479" style="fill:#1fbcfd"/><polygon points="15.435 26.675 19.697 22.438 26.989 29.813 18.593 29.813 15.435 26.675" style="fill:#095a9d"/><polygon points="15.435 26.675 19.406 25.354 18.068 24.057 15.435 26.675" style="fill:#0e5199"/></svg>
-                            </i>
-                        </div>
-                        <h3 class="text-xl font-bold">Flutter</h3>
-                    </div>
-                    <p class="mb-4" data-text-fr="Développement d'applications multiplateformes pour mobile, desktop et web." data-text-en="Cross-platform application development for mobile, desktop and web.">
-                        Développement d'applications multiplateformes pour mobile, desktop et web.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="skill-badge bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Dart</span>
-                        <span class="skill-badge bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Firebase</span>
-                        <span class="skill-badge bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">GetX</span>
-                    </div>
-                </div>
-
-                <!-- Django -->
-                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-green-100 p-3 rounded-full mr-4">
-                            <i class="fab fa-python text-green-600 text-2xl ml-1 mr-1" ></i>
-                        </div>
-                        <h3 class="text-xl font-bold">Django</h3>
-                    </div>
-                    <p class="mb-4" data-text-fr="Développement backend robuste et sécurisé avec Django REST Framework." data-text-en="Robust and secure backend development with Django REST Framework.">
-                        Développement backend robuste et sécurisé avec Django REST Framework.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="skill-badge bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">Python</span>
-                        <span class="skill-badge bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">PostgreSQL</span>
-                        <span class="skill-badge bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">DRF</span>
-                    </div>
-                </div>
-
-                <!-- IA -->
-                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-purple-100 p-3 rounded-full mr-4">
-                            <i class="fas fa-brain text-purple-600 text-2xl ml-1 mr-1"></i>
-                        </div>
-                        <h3 class="text-xl font-bold" data-text-fr="Intelligence Artificielle" data-text-en="Artificial Intelligence">
-                            Intelligence Artificielle
-                        </h3>
-                    </div>
-                    <p class="mb-4" data-text-fr="Applications d'IA, machine learning et traitement de données." data-text-en="AI applications, machine learning and data processing.">
-                        Applications d'IA, machine learning et traitement de données.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Numpy</span>
-                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Matplotlib</span>
-                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Pandas</span>
-                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Sklearn</span>
-                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">TensorFlow</span>
-                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Keras</span>
-                        <span class="skill-badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">NLP</span>
-                    </div>
-                </div>
-
-                <!-- Web Development -->
-                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-orange-100 p-3 rounded-full mr-4">
-                            <i class="fas fa-globe text-orange-600 text-2xl ml-1 mr-1"></i>
-                        </div>
-                        <h3 class="text-xl font-bold" data-text-fr="Développement Web" data-text-en="Web Development">
-                            Développement Web
-                        </h3>
-                    </div>
-                    <p class="mb-4" data-text-fr="Création de sites web modernes et applications web responsives." data-text-en="Creation of modern websites and responsive web applications.">
-                        Création de sites web modernes et applications web responsives.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="skill-badge bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">HTML/CSS</span>
-                        <span class="skill-badge bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">JavaScript</span>
-                        <span class="skill-badge bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">TailwindCss</span>
-                    </div>
-                </div>
-
-                <!-- Database -->
-                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-red-100 p-3 rounded-full mr-4">
-                            <i class="fas fa-database text-red-600 text-2xl ml-1 mr-1"></i>
-                        </div>
-                        <h3 class="text-xl font-bold" data-text-fr="Bases de données" data-text-en="Databases">
-                            Bases de données
-                        </h3>
-                    </div>
-                    <p class="mb-4" data-text-fr="Conception et gestion de bases de données relationnelles et NoSQL." data-text-en="Design and management of relational and NoSQL databases.">
-                        Conception et gestion de bases de données relationnelles et NoSQL.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="skill-badge bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">PostgreSQL</span>
-                        <span class="skill-badge bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">MySQL</span>
-                        <span class="skill-badge bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">SQL Server</span>
-                        <span class="skill-badge bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">MongoDB</span>
-                        <span class="skill-badge bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">SQLite</span>
-                    </div>
-                </div>
-
-                <!-- DevOps -->
-                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-gray-100 p-3 rounded-full mr-4 ">
-                            <i class="fas fa-cogs text-gray-600 text-2xl ml-1 mr-1"></i>
-                        </div>
-                        <h3 class="text-xl font-bold">DevOps</h3>
-                    </div>
-                    <p class="mb-4" data-text-fr="Déploiement et gestion d'infrastructure cloud." data-text-en="Deployment and cloud infrastructure management.">
-                        Déploiement et gestion d'infrastructure cloud.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="skill-badge bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">Docker</span>
-                        <span class="skill-badge bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">AWS</span>
-                        <span class="skill-badge bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">Git</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projets -->
-    <section id="projects" class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold" data-text-fr="Mes Projets" data-text-en="My Projects">
-                    Mes Projets
-                </h2>
-                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Projet 1 -->
-                <div class="project-card rounded-xl overflow-hidden shadow-lg">
-                    <div class="h-48 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                        <i class="fas fa-shopping-cart text-white text-6xl"></i>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2" data-text-fr="Application E-commerce" data-text-en="E-commerce Application">Application E-commerce</h3>
-                        <p class="mb-4" data-text-fr="Application mobile Flutter avec backend Django. Gestion de produits, panier et paiement." data-text-en="Flutter mobile application with Django backend. Product management, cart and payment.">
-                            Application mobile Flutter avec backend Django. Gestion de produits, panier et paiement.
-                        </p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Flutter</span>
-                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Django</span>
-                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Firebase</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Projet 2 -->
-                <div class="project-card rounded-xl overflow-hidden shadow-lg">
-                    <div class="h-48 bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
-                        <i class="fas fa-robot text-white text-6xl"></i>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2" data-text-fr="Système de recommandation" data-text-en="Recommendation System">
-                            Système de recommandation
-                        </h3>
-                        <p class="mb-4" data-text-fr="Système de recommandation basé sur l'IA pour une plateforme éducative." data-text-en="AI-based recommendation system for an educational platform.">
-                            Système de recommandation basé sur l'IA pour une plateforme éducative.
-                        </p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">Python</span>
-                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">TensorFlow</span>
-                            <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs">NLP</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Projet 3 -->
-                <div class="project-card rounded-xl overflow-hidden shadow-lg">
-                    <div class="h-48 bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center">
-                        <i class="fas fa-chart-line text-white text-6xl"></i>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2" data-text-fr="Dashboard Analytique" data-text-en="Analytics Dashboard">
-                            Dashboard Analytique
-                        </h3>
-                        <p class="mb-4" data-text-fr="Application web avec visualisation de données en temps réel." data-text-en="Web application with real-time data visualization.">
-                            Application web avec visualisation de données en temps réel.
-                        </p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Flutter Web</span>
-                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Django</span>
-                            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">WebSockets</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Expérience -->
-    <section id="experience" class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold" data-text-fr="Expérience Professionnelle" data-text-en="Professional Experience">
-                    Expérience Professionnelle
-                </h2>
-                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
-            </div>
-
-            <div class="relative">
-                <!-- Ligne de temps -->
-                <div class="border-l-2 border-purple-500 absolute h-full left-1/2 transform -translate-x-1/2"></div>
-
-                <!-- Expérience 1 -->
-                <div class="mb-8 flex justify-between items-center w-full right-timeline">
-                    <div class="order-1 w-5/12"></div>
-                    <div class="order-1 w-5/12 px-1 py-4">
-                        <div class="card p-6 rounded-lg shadow-lg">
-                            <h3 class="text-xl font-bold text-purple-600">MCS Technology</h3>
-                            <p class="mb-2" data-text-fr="Développeur Full-Stack" data-text-en="Full-Stack Developer">Développeur Full-Stack</p>
-                            <p class="text-sm mb-2">2021 - 2022</p>
-                            <p data-text-fr="Développement d'applications mobiles avec Flutter et création d'APIs avec Django." data-text-en="Mobile application development with Flutter and API creation with Django.">
-                                Développement d'applications mobiles avec Flutter et création d'APIs avec Django.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Expérience 2 -->
-                <div class="mb-8 flex justify-between items-center w-full left-timeline">
-                    <div class="order-1 w-5/12 px-1 py-4">
-                        <div class="card p-6 rounded-lg shadow-lg">
-                            <h3 class="text-xl font-bold text-purple-600">PlastPaper</h3>
-                            <p class="mb-2" data-text-fr="Développeur Flutter" data-text-en="Flutter Developer">Développeur Flutter</p>
-                            <p class="text-sm mb-2">2022 - Présent</p>
-                            <p data-text-fr="Développement d'applications multiplateformes et intégration de solutions IA." data-text-en="Cross-platform application development and AI solutions integration.">
-                                Développement d'applications multiplateformes et intégration de solutions IA.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="order-1 w-5/12"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Certificats -->
-    <section class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold" data-text-fr="Certifications" data-text-en="Certifications">
-                    Certifications
-                </h2>
-                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Certificat 1 -->
-                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-yellow-100 p-3 rounded-full mr-4">
-                            <i class="fas fa-certificate text-yellow-600 text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold">Flutter Expert</h3>
-                    </div>
-                    <p class="mb-2" data-text-fr="Certification avancée en développement Flutter." data-text-en="Advanced certification in Flutter development.">
-                        Certification avancée en développement Flutter.
-                    </p>
-                    <p class="text-sm">2021</p>
-                </div>
-
-                <!-- Certificat 2 -->
-                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-red-100 p-3 rounded-full mr-4">
-                            <i class="fas fa-robot text-red-600 text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold" data-text-fr="Spécialiste en IA" data-text-en="AI Specialist">
-                            Spécialiste en IA
-                        </h3>
-                    </div>
-                    <p class="mb-2" data-text-fr="Master en Intelligence Artificielle et ses applications." data-text-en="Master's in Artificial Intelligence and its applications.">
-                        Master en Intelligence Artificielle et ses applications.
-                    </p>
-                    <p class="text-sm">2020</p>
-                </div>
-
-                <!-- Certificat 3 -->
-                <div class="card p-6 rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-green-100 p-3 rounded-full mr-4">
-                            <i class="fab fa-python text-green-600 text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold">Django Professional</h3>
-                    </div>
-                    <p class="mb-2" data-text-fr="Certification en développement backend avec Django." data-text-en="Certification in backend development with Django.">
-                        Certification en développement backend avec Django.
-                    </p>
-                    <p class="text-sm">2019</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact -->
-    <section id="contact" class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold" data-text-fr="Contactez-moi" data-text-en="Contact me">
-                    Contactez-moi
-                </h2>
-                <div class="w-20 h-1 bg-gradient-to-r from-purple-600 to-blue-500 mx-auto mt-4"></div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-12">
-                <div>
-                    <h3 class="text-2xl font-bold mb-6" data-text-fr="Disponible pour de nouvelles opportunités" data-text-en="Available for new opportunities">
-                        Disponible pour de nouvelles opportunités
-                    </h3>
-                    <p class="mb-8" data-text-fr="Si vous avez un projet intéressant ou souhaitez discuter d'une collaboration, n'hésitez pas à me contacter." data-text-en="If you have an interesting project or would like to discuss a collaboration, please don't hesitate to contact me.">
-                        Si vous avez un projet intéressant ou souhaitez discuter d'une collaboration, n'hésitez pas à me contacter.
-                    </p>
-
-                    <div class="space-y-4">
-                        <div class="flex items-center">
-                            <div class="bg-purple-100 p-3 rounded-full mr-4">
-                                <i class="fas fa-envelope text-purple-600"></i>
-                            </div>
-                            <span>aminebaich116@gmail.com</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="bg-blue-100 p-3 rounded-full mr-4">
-                                <i class="fas fa-phone-alt text-blue-600"></i>
-                            </div>
-                            <span>+213 7 70 08 92 76</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-8">
-                        <h4 class="font-bold mb-4" data-text-fr="Réseaux sociaux" data-text-en="Social networks">
-                            Réseaux sociaux
-                        </h4>
-                        <div class="flex space-x-4">
-                            <a href="#" class="btn-hover p-3 rounded-full hover:bg-purple-600 hover:text-white transition">
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
-                            <a href="#" class="btn-hover p-3 rounded-full hover:bg-blue-500 hover:text-white transition">
-                                <i class="fab fa-twitter"></i>
-                            </a>
-                            <a href="#" class="btn-hover p-3 rounded-full hover:bg-gray-800 hover:text-white transition">
-                                <i class="fab fa-github"></i>
-                            </a>
-                            <a href="#" class="btn-hover p-3 rounded-full hover:bg-pink-600 hover:text-white transition">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card p-8 rounded-xl shadow-lg">
-                    <form id="contact-form">
-                        <div class="mb-6">
-                            <label for="name" class="block mb-2 font-medium" data-text-fr="Nom complet" data-text-en="Full name">
-                                Nom complet
-                            </label>
-                            <input type="text" id="name" class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div class="mb-6">
-                            <label for="email" class="block mb-2 font-medium" data-text-fr="Email" data-text-en="Email">
-                                Email
-                            </label>
-                            <input type="email" id="email" class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div class="mb-6">
-                            <label for="message" class="block mb-2 font-medium" data-text-fr="Message" data-text-en="Message">
-                                Message
-                            </label>
-                            <textarea id="message" rows="5" class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 rounded-lg font-medium hover:shadow-lg transition" data-text-fr="Envoyer le message" data-text-en="Send message">
-                            Envoyer le message
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-300 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <p class="text-lg font-semibold">Mohammed Amine Baich</p>
-                    <p class="text-sm" data-text-fr="Développeur Full-Stack passionné par l'innovation technologique." data-text-en="Full-Stack Developer passionate about technological innovation.">
-                        Développeur Full-Stack passionné par l'innovation technologique.
-                    </p>
-                </div>
-                <div class="flex flex-col items-center md:items-end">
-                    <div class="flex space-x-6 mb-4">
-                        <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-linkedin-in text-xl"></i></a>
-                        <a href="#" class="hover:text-blue-400 transition"><i class="fab fa-twitter text-xl"></i></a>
-                        <a href="#" class="hover:text-gray-400 transition"><i class="fab fa-github text-xl"></i></a>
-                        <a href="#" class="hover:text-pink-400 transition"><i class="fab fa-instagram text-xl"></i></a>
-                    </div>
-                    <p class="text-sm" data-text-fr="© 2023 Tous droits réservés" data-text-en="© 2023 All rights reserved">
-                        © 2023 Tous droits réservés
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // Variables globales
-        let currentLanguage = 'fr';
-        let currentTheme = 'light';
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeTheme();
-            initializeLanguage();
-            setupEventListeners();
-            
-            // Démarrer l'animation 3D seulement sur desktop
-            if (window.innerWidth > 768) {
-                init3DScene();
+    // ── SCROLL ANIMATION ──
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+                setTimeout(() => e.target.classList.add('visible'), i * 80);
             }
         });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
 
-        function initializeTheme() {
-            // Vérifier le thème préféré au chargement
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
-            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                currentTheme = 'dark';
-                document.documentElement.setAttribute('data-theme', 'dark');
-            } else {
-                currentTheme = 'light';
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-            
-            updateThemeIcon();
+    // ── CONTACT FORM ──
+    document.getElementById('f-submit').addEventListener('click', () => {
+        const n = document.getElementById('f-name').value;
+        const e = document.getElementById('f-email').value;
+        const m = document.getElementById('f-msg').value;
+        if (n && e && m) {
+            alert(lang === 'fr' ? '✅ Message envoyé avec succès !' : '✅ Message sent successfully!');
+            document.getElementById('f-name').value = '';
+            document.getElementById('f-email').value = '';
+            document.getElementById('f-msg').value = '';
+        } else {
+            alert(lang === 'fr' ? '⚠️ Veuillez remplir tous les champs.' : '⚠️ Please fill in all fields.');
         }
-
-        function initializeLanguage() {
-            // Charger la langue préférée au démarrage
-            const savedLanguage = localStorage.getItem('language') || 'fr';
-            changeLanguage(savedLanguage);
-        }
-
-        function setupEventListeners() {
-            // Dark/Light mode toggle
-            const themeToggle = document.getElementById('theme-toggle');
-            if (themeToggle) {
-                themeToggle.addEventListener('click', toggleTheme);
-            }
-
-            // Gestion du dropdown de langue
-            const languageToggle = document.getElementById('language-toggle');
-            const languageDropdown = document.getElementById('language-dropdown');
-            
-            if (languageToggle && languageDropdown) {
-                languageToggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    languageDropdown.classList.toggle('show');
-                });
-
-                // Fermer le dropdown si on clique ailleurs
-                document.addEventListener('click', (e) => {
-                    if (!languageToggle.contains(e.target) && !languageDropdown.contains(e.target)) {
-                        languageDropdown.classList.remove('show');
-                    }
-                });
-
-                // Gestion du changement de langue
-                const langButtons = languageDropdown.querySelectorAll('[data-lang]');
-                langButtons.forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const lang = button.getAttribute('data-lang');
-                        changeLanguage(lang);
-                        languageDropdown.classList.remove('show');
-                    });
-                });
-            }
-
-            // Gestion du formulaire de contact
-            const contactForm = document.getElementById('contact-form');
-            if (contactForm) {
-                contactForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const name = document.getElementById('name').value;
-                    const email = document.getElementById('email').value;
-                    const message = document.getElementById('message').value;
-                    
-                    if (name && email && message) {
-                        alert(currentLanguage === 'fr' ? 'Message envoyé avec succès!' : 'Message sent successfully!');
-                        contactForm.reset();
-                    } else {
-                        alert(currentLanguage === 'fr' ? 'Veuillez remplir tous les champs.' : 'Please fill in all fields.');
-                    }
-                });
-            }
-
-            // Smooth scrolling pour les liens de navigation
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                });
-            });
-        }
-
-        function toggleTheme() {
-            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            localStorage.setItem('theme', currentTheme);
-            updateThemeIcon();
-        }
-
-        function updateThemeIcon() {
-            const themeIcon = document.getElementById('theme-icon');
-            if (themeIcon) {
-                if (currentTheme === 'dark') {
-                    themeIcon.className = 'fas fa-sun theme-icon';
-                } else {
-                    themeIcon.className = 'fas fa-moon theme-icon';
-                }
-            }
-        }
-
-        function changeLanguage(lang) {
-            currentLanguage = lang;
-            
-            // Mettre à jour l'affichage de la langue actuelle
-            const currentLangSpan = document.getElementById('current-lang');
-            if (currentLangSpan) {
-                currentLangSpan.textContent = lang.toUpperCase();
-            }
-            
-            // Mettre à jour tous les éléments avec des attributs data-text
-            const elementsWithText = document.querySelectorAll('[data-text-fr][data-text-en]');
-            
-            elementsWithText.forEach(element => {
-                const textKey = `data-text-${lang}`;
-                if (element.hasAttribute(textKey)) {
-                    element.textContent = element.getAttribute(textKey);
-                }
-            });
-
-            // Mettre à jour l'attribut lang du document
-            document.documentElement.setAttribute('lang', lang);
-            
-            // Sauvegarder la préférence de langue
-            localStorage.setItem('language', lang);
-        }
-
-        // Animation 3D avec Three.js
-        function init3DScene() {
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            
-            const sceneContainer = document.getElementById('scene-3d');
-            if (sceneContainer) {
-                sceneContainer.appendChild(renderer.domElement);
-            }
-
-            // Lumière
-            const light = new THREE.DirectionalLight(0xffffff, 1);
-            light.position.set(1, 1, 1);
-            scene.add(light);
-
-            const ambientLight = new THREE.AmbientLight(0x404040);
-            scene.add(ambientLight);
-
-            // Formes géométriques
-            const geometry1 = new THREE.TorusGeometry(1, 0.4, 16, 100);
-            const material1 = new THREE.MeshPhongMaterial({ 
-                color: 0x7b46f5,
-                transparent: true,
-                opacity: 0.7,
-                shininess: 100
-            });
-            const torus = new THREE.Mesh(geometry1, material1);
-            scene.add(torus);
-
-            const geometry2 = new THREE.IcosahedronGeometry(0.8, 0);
-            const material2 = new THREE.MeshPhongMaterial({ 
-                color: 0x3b82f6,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.5
-            });
-            const icosahedron = new THREE.Mesh(geometry2, material2);
-            scene.add(icosahedron);
-
-            camera.position.z = 5;
-
-            // Animation
-            function animate() {
-                requestAnimationFrame(animate);
-                
-                torus.rotation.x += 0.005;
-                torus.rotation.y += 0.01;
-                
-                icosahedron.rotation.x -= 0.005;
-                icosahedron.rotation.y -= 0.01;
-                
-                renderer.render(scene, camera);
-            }
-
-            animate();
-
-            // Redimensionnement
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-        }
-    </script>
+    });
+</script>
 </body>
 </html>
-
