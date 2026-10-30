@@ -310,10 +310,23 @@
         }
         .proj-card:hover, .proj-card:focus-visible { border-color: var(--accent); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.25); outline: none; }
         .proj-header {
-            height: 130px; display: flex; align-items: center; justify-content: center;
+            height: 170px; display: flex; align-items: center; justify-content: center;
             position: relative; overflow: hidden;
         }
         .proj-header i { font-size: 3.2rem; opacity: 0.92; color: #fff; z-index: 1; }
+        .proj-shot {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; object-position: top left; transition: transform 0.4s;
+        }
+        .proj-card:hover .proj-shot { transform: scale(1.04); }
+        .proj-header.has-shot > i {
+            position: absolute; left: 14px; bottom: 12px; font-size: 1.1rem;
+            background: rgba(0,0,0,0.55); border-radius: 10px; padding: 8px; opacity: 1;
+        }
+        .m-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+        .m-gallery a { display: block; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .m-gallery img { display: block; width: 100%; height: auto; transition: opacity 0.2s; }
+        .m-gallery a:hover img { opacity: 0.85; }
         .proj-live {
             position: absolute; top: 12px; right: 12px; z-index: 2;
             background: rgba(0,0,0,0.45); color: #fff; font-size: 0.7rem; font-weight: 600;
@@ -1744,6 +1757,253 @@
             'Fennec Invest': ['FinTech · MCS Technology', 'Fennec Invest', 'App mobile de investimento em criptomoedas: carteira, gráficos em tempo real, autenticação segura.']
         }
     };
+    // Spanish / Portuguese detail sections, keyed by English title: c = context, f = features, h = challenge
+    const PXD = {
+        es: {
+            'PlastPaper central backend': {
+                c: 'Al llegar, cada necesidad tenía su propio pequeño backend (inventario, órdenes de trabajo, predicción de averías, control de recepción…), además de un antiguo servidor Laravel. Mantenerlo todo en paralelo se había vuelto imposible.',
+                f: ['<strong>Fusión de 11 proyectos</strong> en un único backend Django, organizado en apps de negocio (stock, traspasos, inventario, máquinas, permisos, mantenimiento, compras, scorecard, IA, procedimientos…)', '<strong>Sincronización programada</strong> de artículos, moldes y repuestos desde el ERP Wavesoft (SQL Server) cada 10 minutos', '<strong>Escritura en el ERP</strong> a través de su cola de automatización: un traspaso genera los dos documentos Wavesoft (salida al almacén de tránsito y entrada), con seguimiento del estado', '<strong>Roles y matriz de permisos</strong> (rol × sección × acción: ver, crear, editar, borrar, bloquear)', '<strong>Tienda interna de APK</strong>: cada app comprueba su versión al arrancar y propone la actualización', 'Despliegue en Ubuntu Server: ~15 servicios systemd, PostgreSQL, Daphne para los WebSockets'],
+                h: 'Hacer convivir tres fuentes de verdad (ERP Wavesoft, Laravel heredado, nuevo Django) sin romper las APK ya instaladas: los identificadores no son portables entre sistemas, así que la correspondencia se hace por código de artículo, y cada cambio de API sigue siendo compatible con las versiones antiguas de las APK.'
+            },
+            'Stock Manager — transfers & production': {
+                c: 'El antiguo módulo «Traspaso» solo gestionaba un artículo por movimiento, y nada garantizaba que el almacén destinatario hubiera recibido la mercancía. Las diferencias de stock se descubrían demasiado tarde.',
+                f: ['<strong>Traspasos multi-artículo</strong> con referencia (TR-AAAA-NNNN), almacén de origen/destino deducido de los roles del agente, estado en tránsito / recibido / anulado', '<strong>El almacén destinatario recibe un aviso</strong> y confirma las cantidades realmente recibidas', '<strong>Circuitos entre almacenes</strong>: reglas que definen adónde puede enviar cada almacén y qué tipos de artículos', '<strong>Módulo Producción (almacén 08)</strong>: recuento diario de la producción de los 3 turnos, saldo acumulado reducido por las salidas', 'Envío automático de los movimientos al ERP Wavesoft', 'Actualizaciones de la APK distribuidas por la tienda interna'],
+                h: 'El ERP no siempre está al día: un agente puede expedir palés producidos ese mismo día que nunca se contaron. En lugar de dejar el saldo en negativo, esas salidas se apartan como «salida no constatada» y el siguiente recuento las regulariza automáticamente.'
+            },
+            'Daily Scorecard + AI tab': {
+                c: 'Cada mañana, una compañera actualizaba un libro Excel Power Pivot y lo enviaba en PDF a la dirección. Las cifras llegaban tarde, algunas se corregían a mano y nadie podía explorar el histórico.',
+                f: ['<strong>Fórmulas DAX extraídas</strong> del libro (vía Excel COM) y reescritas en Python: volumen, disponibilidad, OEE, por máquina, turno y jefe de equipo', '<strong>Sincronización 3 veces al día</strong> desde la base de producción, histórico cargado desde enero de 2025, validado a ±1 punto frente al Excel', 'Pestañas Scorecard, Histórico, Análisis y Datos; registro del rechazo pesado', '<strong>IA – paso 1</strong>: proyección de fin de mes de los KPI con horquilla y probabilidad de alcanzar el objetivo (gradient boosting, calendario de Ramadán/festivos) + detección de anomalías por máquina', '<strong>IA – paso 2</strong>: riesgo de avería por máquina en los próximos turnos', '<strong>IA – paso 3</strong>: asistente LLM que responde en lenguaje natural sobre los KPI, con conmutación automática entre 4 proveedores (Groq → Gemini → OpenRouter → Ollama)'],
+                h: 'Reproducir fielmente un modelo Power Pivot que en parte se corregía a mano: hubo que encontrar cada diferencia (filas duplicadas máquina/día, ciclos teóricos ajustados manualmente) y hacerla explícita en la app en lugar de ocultarla.'
+            },
+            'Camera-based truck counter': {
+                c: 'La dirección quería conocer el flujo real de camiones en el sitio sin hardware adicional: solo con las cámaras de vigilancia existentes.',
+                f: ['<strong>Servicio de detección</strong> en Python: modelo YOLO exportado a OpenVINO para funcionar en CPU', 'Conteo por cruce de línea, eventos registrados en Django (cámara, sentido, hora)', '<strong>Flujo en tiempo real</strong> (MJPEG anotado) y estado del servicio expuestos por HTTP', 'Dashboard React: contadores del día, histórico, vista en directo', 'Autenticación entre servicios por token'],
+                h: 'El cifrado de los flujos de vídeo del grabador lo impone la política de la empresa y debía seguir activo: imposible leer el RTSP. Lo resolví limpiamente consultando la API de imágenes del grabador (~2,5 imágenes/s) en lugar del flujo de vídeo.'
+            },
+            'Inventory & pallet labels': {
+                c: 'Los inventarios se hacían en papel y las etiquetas de los palés se producían a mano en Figma (cambiar fecha, hora y lote en variables, exportar página a página).',
+                f: ['Recuento móvil (Flutter) y <strong>dashboard React</strong>: inventario, devoluciones, movimientos, producción, artículos, ajustes', '<strong>Matriz de permisos</strong> rol × sección × acción, permisos acumulados por roles, protección contra el autobloqueo', '<strong>Ficha de palé</strong>: hojas A4 de 4 etiquetas generadas en PDF (ReportLab) a partir de la ficha de artículo sincronizada (designación, EAN-13, unidades por paquete y por palé)', 'Número de palé único (fecha + taller + contador diario) reservado de forma atómica', 'Código del jefe de taller calculado automáticamente a partir de las cuentas de usuario'],
+                h: 'La numeración de palés debía seguir siendo única mientras el planificador de sincronización escribe en paralelo en la misma base: reserva bajo bloqueo (select_for_update) con reintento automático si la base está bloqueada.'
+            },
+            'Work permits & maintenance orders': {
+                c: 'Existían dos aplicaciones separadas para HSE y mantenimiento, con dos interfaces y dos direcciones distintas para los mismos usuarios.',
+                f: ['<strong>Permisos de trabajo</strong>: CRUD completo, checklists de referencia (riesgos, EPI, consignaciones)', '<strong>Solicitudes y órdenes de trabajo</strong>: envío → verificación/planificación → aceptación o rechazo, repuestos consumidos sincronizados desde el ERP', '<strong>Impresión de los formularios de calidad</strong> (FOR.HSE / FOR.MAINT) en PDF desde el navegador, fieles a los originales', 'Moldes vinculados a las solicitudes, sincronizados desde el ERP', 'Sin cambios en el backend: reutilización de los endpoints existentes'],
+                h: 'Portar al idéntico unas maquetas PDF hechas con el paquete «pdf» de Flutter a @react-pdf/renderer, y hacer funcionar el sistema antiguo y el nuevo en paralelo durante la validación.'
+            },
+            'Predictive maintenance': {
+                c: 'Las averías de las inyectoras se trataban a posteriori. El histórico de paradas existía, pero no se explotaba.',
+                f: ['Variables construidas a partir del histórico (frecuencia y duración de las paradas recientes, ciclo, turno, molde)', '<strong>Clasificación XGBoost</strong> de la parada y de su causa probable', '<strong>Validación cruzada temporal</strong> para evitar cualquier fuga de datos del futuro', 'API Django REST + app móvil Flutter para operarios y mantenimiento'],
+                h: 'Datos de paradas muy desequilibrados y ruidosos (causas en texto libre): limpieza de etiquetas y una métrica adecuada (AUC) en lugar de la simple precisión.'
+            },
+            'Purchasing dashboard (V1 & V2)': {
+                c: 'El responsable de compras seguía los pedidos de la marca Home Life en una página HTML que lo guardaba todo en el navegador: sin copia de seguridad ni posibilidad de compartir.',
+                f: ['App Django «achats»: pedidos, recepciones, proveedores, tareas y subtareas, objetivos de presupuesto y frecuencia, registro, adjuntos', 'SPA React con todos los cálculos de negocio portados fielmente desde la herramienta original', 'Importación del histórico existente (copia JSON) mediante un endpoint dedicado', '<strong>V2</strong>: nueva interfaz sobre los mismos datos, V1 conservada en paralelo, cambios de backend solo aditivos'],
+                h: 'Migrar sin pérdidas ni cambios de comportamiento para el usuario: cada cálculo del antiguo JavaScript se trasladó idéntico antes de mejorar la interfaz.'
+            },
+            'Kelio time clock & headcount': {
+                c: 'Cada día, un archivo de texto listaba al personal que había fichado a las 6h, 14h y 21h; los jefes de equipo lo usaban para asignar operarios a las máquinas.',
+                f: ['Conexión de solo lectura a la base Firebird integrada del reloj de fichaje Kelio', 'Exploración y extracción del esquema de la base propietaria', 'Página «Plantilla» agregada por turno, sin datos nominativos'],
+                h: 'Una base propietaria sin documentar, en un puerto no estándar y con una autenticación Firebird específica: diagnóstico a distancia con el cliente oficial de Firebird y un script de exploración de solo lectura.'
+            },
+            'Procedures & handover hub': {
+                c: 'Los procedimientos estaban dispersos y la empresa quería medir lo cerca que estaba de la ISO 9001, preparando a la vez la llegada de nuevos informáticos.',
+                f: ['Procedimientos versionados con historial, evaluaciones y hallazgos', '<strong>Puntuación de conformidad</strong> estimada (vigente / borrador / no conformidad), reemplazable por una evaluación manual', 'Pasos de integración para las nuevas incorporaciones de IT', '<strong>Escaparate técnico</strong> de todos los proyectos generado automáticamente por un script de escaneo (lenguajes, arquitectura, dependencias), sin copiar nunca secretos'],
+                h: 'Añadir un módulo completo sin afectar a la estabilidad del backend compartido: app Django sin dependencias de migración, desplegada con un script que solo añade dos líneas a la configuración de producción.'
+            },
+            'KEBA KePlast press monitoring': {
+                c: 'El estado de las prensas (en marcha, parada, reinicio) solo era visible en la propia máquina.',
+                f: ['Ingeniería inversa de la API HTTP del controlador KEBA (POST /login, cookies de sesión)', 'Gestión de versiones antiguas de SSL/TLS en los controladores', 'Histórico de paradas y reinicios, dashboard en tiempo real'],
+                h: 'Sin documentación pública: todo se dedujo observando el tráfico de la interfaz web del controlador.'
+            },
+            'Goods receipt, Odoo & reports': {
+                c: 'Muchas tareas repetitivas de informes y administración se hacían a mano cada día.',
+                f: ['Dashboard React de <strong>control de recepción</strong> de mercancías', 'Scripts Python Odoo RPC para gestionar compras y facturas', 'Informes Excel diarios de facturación (xlsxwriter + SQL Server)', 'Cuadro de control de compras (openpyxl)', 'Automatización del cortafuegos pfSense por SSH (paramiko)'],
+                h: 'Hacer fiables estas automatizaciones sin supervisión: scripts idempotentes, con registro y programados.'
+            },
+            'Superette — POS, stock & analytics': {
+                c: 'Los pequeños comercios argelinos usan a menudo cajas caras o poco adaptadas. Quería un software moderno, fácil de instalar en la red local, que aprovechara el móvil del empleado en lugar de comprar hardware.',
+                f: ['<strong>TPV de escritorio</strong> (Flutter Windows/macOS/Linux): venta, descuentos por línea y por ticket, IVA, margen, códigos de balanza, tickets en espera, atajos F2–F9', '<strong>Móvil = escáner inalámbrico</strong>: se empareja escaneando un QR en la caja, sin Bluetooth ni drivers', '<strong>Recepción de entregas</strong> en el móvil con el margen previsto mostrado en directo', 'Inventarios, verificador de precios en el lineal, clientes, proveedores', 'Estadísticas de ventas, roles (admin, gerente, cajero, almacenero) que ocultan las pantallas no autorizadas', 'Servidor Django + DRF con documentación interactiva de la API; datos de demo (45 productos EAN-13, 45 días de ventas)', 'Tests automáticos del cálculo del ticket, la parte donde un error cuesta dinero'],
+                h: 'Hacer instantáneo el emparejamiento móvil ↔ caja: el QR contiene la dirección del servidor y un canal temporal (caduca a las 12 h), así que el móvil se configura solo.'
+            },
+            'IronCore — gym management': {
+                c: 'Los gerentes de gimnasios gestionan a menudo los abonos en cuadernos o Excel y no tienen un control fiable en la entrada.',
+                f: ['<strong>Acceso con Face ID</strong>: escaneo con webcam cada 1,5 s, el socio entra sin hacer nada; antiduplicado configurable', '<strong>Tarjeta de socio QR</strong> imprimible en formato tarjeta bancaria (PDF con foto), legible con escáner USB', 'Modo quiosco a pantalla completa: veredicto, plan, días o sesiones restantes, motivo de rechazo', 'Abonos por duración, bonos de sesiones, pases de día, congelación del abono', 'Tienda de suplementos, estadísticas detalladas', '100 % local y sin conexión (SQLite), ninguna conexión saliente'],
+                h: 'El plugin de cámara de Flutter no abría algunas webcams de portátil. Creé un pequeño servicio Python local (OpenCV + InsightFace) que gestiona la cámara y calcula las huellas faciales; la app cambia a él automáticamente cuando está en marcha.'
+            },
+            'Rihla — hiking platform': {
+                c: 'Los organizadores de rutas en Argelia gestionan las inscripciones por Facebook y WhatsApp. Rihla centraliza la oferta, las reservas y los pagos.',
+                f: ['<strong>5 superficies</strong>: app cliente (Flutter), app Rihla Pro para organizadores, dashboard de administración, app cliente web, sitio de presentación', 'Reservas con estados (pendiente, anticipo enviado, validada, rechazada, cancelada, terminada)', '<strong>Puntos de fidelidad</strong> y opiniones, abonados por una tarea programada al terminar la salida', 'Mapa del punto de encuentro y del destino, distancia por carretera calculada con OpenRouteService', 'Guías y páginas en <strong>FR / EN / AR</strong> guardadas en base de datos, editables sin redesplegar', 'Roles: superadmin, admin, agente de campo limitado, organizador, cliente', 'Alojamiento cPanel / LiteSpeed, API Django + MySQL, SSL en todos los subdominios'],
+                h: 'Desplegar 5 aplicaciones en un alojamiento compartido: subdominios dedicados, fallback SPA y tipos MIME forzados vía .htaccess, tareas cron para las transiciones de estado.'
+            },
+            'TikRed — video-first food marketplace': {
+                c: 'En Orán, muchos cocineros caseros venden con vídeos y gestionan los pedidos por mensaje privado: pedidos perdidos, clientes que abandonan, cancelaciones que cuestan los ingredientes.',
+                f: ['Feed de vídeo estilo red social, pedido directamente desde el vídeo', '<strong>Una sola cuenta</strong>: cualquier cliente puede activar un perfil de cocinero', 'Anticipo parcial configurable (CCP), precompras con gestión del overbooking y los reembolsos', 'Mapa de descubrimiento de negocios, visibilidad en línea / solo mapa / en pausa', 'Backend Django modular (catálogo, pedidos, pagos, entrega, social, notificaciones), back-office React, sitio Next.js', 'Versión localizada en darija latina'],
+                h: 'Proteger al cocinero de las cancelaciones de última hora sin desanimar al cliente: anticipo ajustable por el cocinero y reglas claras de reembolso.'
+            },
+            'CovX — ride-hailing app': {
+                c: 'Proyecto para dominar un flujo de negocio completo en tiempo real, desde el punto de recogida hasta el pago.',
+                f: ['Elección de origen y destino en el mapa', 'Estimación de la tarifa según el tipo de vehículo, tarifa final a la llegada', 'Máquina de estados del viaje: búsqueda → aceptado → iniciado → terminado / cancelado (con autor y motivo)', 'Roles de pasajero y conductor, marca de tiempo en cada paso'],
+                h: 'Mantener transiciones de estado coherentes cuando pasajero y conductor actúan a la vez.'
+            },
+            'Retail-store scraper — 58 provinces': {
+                c: 'Hacía falta una base de prospección B2B (mayoristas y minoristas) que cubriera todo el país, sin API de pago.',
+                f: ['Cruce de las 58 provincias con palabras clave en <strong>francés, árabe y darija</strong>', 'Recogida rápida desplazando los resultados y luego enriquecimiento ficha por ficha', 'Reanudación tras fallos gracias a puntos de control', 'Eliminación de duplicados y exportación final a Excel'],
+                h: 'Las búsquedas en árabe y darija suelen dar mejores resultados que el francés para el comercio local: había que combinar las tres y eliminar duplicados correctamente.'
+            },
+            'ASVES — asves-dz.com': {
+                c: 'La asociación necesitaba una presencia en línea clara y moderna para sus miembros y sus eventos.',
+                f: ['Diseño moderno y responsive', 'Contenido estructurado y optimizado para SEO', 'Alojamiento y puesta en línea en cPanel'],
+                h: 'Entregar un sitio rápido y fácil de mantener para un equipo no técnico.'
+            },
+            'HomeLife / HomeLife Pro': {
+                c: 'La marca quería que sus revendedores pudieran pedir en línea en lugar de por teléfono.',
+                f: ['Catálogo de productos, pedidos y seguimiento de entregas', 'App Flutter para revendedores', 'Sitio Django + TailwindCSS, nueva versión en Next.js', 'Mapa de los puntos de venta'],
+                h: 'Adaptar precios y condiciones según el tipo de cliente (mayorista, minorista, gran superficie).'
+            },
+            'Felanout': {
+                c: 'Poner en contacto a restaurantes con excedentes o franjas tranquilas con clientes que buscan ofertas.',
+                f: ['3 aplicaciones Flutter que comparten los mismos componentes', 'Gestión de descuentos y programa de fidelidad', 'Seguimiento de pedidos en tiempo real (Firebase)'],
+                h: 'Sincronizar en tiempo real tres apps con roles distintos sobre los mismos pedidos.'
+            },
+            'SAFHADID — weighbridge': {
+                c: 'Las pesadas de camiones se anotaban a mano, con riesgo de errores y fraude.',
+                f: ['Lectura directa del peso desde el indicador (puerto COM)', 'Pesada de entrada/salida y cálculo del neto', 'Histórico y tickets de pesada'],
+                h: 'Interpretar un flujo serie en bruto e inestable para obtener un peso fiable.'
+            },
+            'Fennec Invest': {
+                c: 'Ofrecer una interfaz móvil sencilla para seguir y gestionar una cartera cripto.',
+                f: ['Seguimiento de cartera', 'Gráficos de cotización en tiempo real', 'Autenticación segura'],
+                h: 'Mostrar gráficos fluidos con datos que cambian continuamente.'
+            }
+        },
+        pt: {
+            'PlastPaper central backend': {
+                c: 'Quando cheguei, cada necessidade tinha seu próprio pequeno backend (inventário, ordens de serviço, previsão de falhas, controle de recebimento…), além de um antigo servidor Laravel. Manter tudo em paralelo tinha se tornado impossível.',
+                f: ['<strong>Fusão de 11 projetos</strong> em um único backend Django, organizado em apps de negócio (estoque, transferências, inventário, máquinas, permissões, manutenção, compras, scorecard, IA, procedimentos…)', '<strong>Sincronização agendada</strong> de itens, moldes e peças de reposição a partir do ERP Wavesoft (SQL Server) a cada 10 minutos', '<strong>Escrita no ERP</strong> pela sua fila de automação: uma transferência gera os dois documentos Wavesoft (saída para o almoxarifado de trânsito e entrada), com acompanhamento do status', '<strong>Papéis e matriz de permissões</strong> (papel × seção × ação: ver, criar, editar, excluir, bloquear)', '<strong>Loja interna de APK</strong>: cada app verifica sua versão ao iniciar e oferece a atualização', 'Deploy em Ubuntu Server: ~15 serviços systemd, PostgreSQL, Daphne para os WebSockets'],
+                h: 'Fazer conviver três fontes de verdade (ERP Wavesoft, Laravel legado, novo Django) sem quebrar os APKs já instalados: os IDs não são portáveis entre sistemas, então a correspondência é feita pelo código do item, e cada mudança de API continua compatível com as versões antigas dos APKs.'
+            },
+            'Stock Manager — transfers & production': {
+                c: 'O antigo módulo “Transferência” só tratava um item por movimento, e nada garantia que o almoxarifado de destino tinha recebido a mercadoria. As diferenças de estoque eram descobertas tarde demais.',
+                f: ['<strong>Transferências multi-item</strong> com referência (TR-AAAA-NNNN), almoxarifado de origem/destino deduzido dos papéis do agente, status em trânsito / recebido / cancelado', '<strong>O almoxarifado de destino é notificado</strong> e confirma as quantidades realmente recebidas', '<strong>Circuitos entre almoxarifados</strong>: regras que definem para onde cada almoxarifado pode enviar e quais tipos de item', '<strong>Módulo Produção (almoxarifado 08)</strong>: recontagem diária da produção dos 3 turnos, saldo acumulado reduzido pelas saídas', 'Envio automático dos movimentos para o ERP Wavesoft', 'Atualizações do APK distribuídas pela loja interna'],
+                h: 'O ERP nem sempre está atualizado: um agente pode expedir paletes produzidos no mesmo dia que nunca foram contados. Em vez de deixar o saldo negativo, essas saídas ficam separadas como “saída não constatada” e a contagem seguinte as regulariza automaticamente.'
+            },
+            'Daily Scorecard + AI tab': {
+                c: 'Toda manhã, uma colega atualizava uma planilha Excel Power Pivot e a enviava em PDF para a direção. Os números chegavam tarde, alguns eram corrigidos à mão e ninguém conseguia explorar o histórico.',
+                f: ['<strong>Fórmulas DAX extraídas</strong> da planilha (via Excel COM) e reescritas em Python: volume, disponibilidade, OEE, por máquina, turno e líder de equipe', '<strong>Sincronização 3 vezes ao dia</strong> a partir da base de produção, histórico carregado desde janeiro de 2025, validado a ±1 ponto em relação ao Excel', 'Abas Scorecard, Histórico, Análise e Dados; registro do refugo pesado', '<strong>IA – etapa 1</strong>: projeção de fim de mês dos KPIs com faixa e probabilidade de atingir a meta (gradient boosting, calendário de Ramadã/feriados) + detecção de anomalias por máquina', '<strong>IA – etapa 2</strong>: risco de falha por máquina nos próximos turnos', '<strong>IA – etapa 3</strong>: assistente LLM que responde em linguagem natural sobre os KPIs, com alternância automática entre 4 provedores (Groq → Gemini → OpenRouter → Ollama)'],
+                h: 'Reproduzir fielmente um modelo Power Pivot que era em parte corrigido à mão: foi preciso encontrar cada divergência (linhas duplicadas máquina/dia, ciclos teóricos ajustados manualmente) e torná-la explícita no app em vez de escondê-la.'
+            },
+            'Camera-based truck counter': {
+                c: 'A direção queria conhecer o fluxo real de caminhões no local sem hardware adicional: apenas com as câmeras de vigilância existentes.',
+                f: ['<strong>Serviço de detecção</strong> em Python: modelo YOLO exportado para OpenVINO para rodar em CPU', 'Contagem por cruzamento de linha, eventos registrados no Django (câmera, sentido, horário)', '<strong>Fluxo em tempo real</strong> (MJPEG anotado) e status do serviço expostos via HTTP', 'Dashboard React: contadores do dia, histórico, visualização ao vivo', 'Autenticação entre serviços por token'],
+                h: 'A criptografia dos fluxos de vídeo do gravador é imposta pela política da empresa e precisava continuar ativa: impossível ler o RTSP. Resolvi de forma limpa consultando a API de imagens do gravador (~2,5 imagens/s) em vez do fluxo de vídeo.'
+            },
+            'Inventory & pallet labels': {
+                c: 'Os inventários eram feitos em papel, e as etiquetas dos paletes eram produzidas à mão no Figma (mudar data, hora e lote em variáveis, exportar página por página).',
+                f: ['Contagem mobile (Flutter) e <strong>dashboard React</strong>: inventário, devoluções, movimentos, produção, itens, configurações', '<strong>Matriz de permissões</strong> papel × seção × ação, permissões somadas entre papéis, proteção contra autobloqueio', '<strong>Ficha de palete</strong>: folhas A4 com 4 etiquetas geradas em PDF (ReportLab) a partir do cadastro de item sincronizado (descrição, EAN-13, unidades por pacote e por palete)', 'Número de palete único (data + oficina + contador diário) reservado de forma atômica', 'Código do chefe de oficina calculado automaticamente a partir das contas de usuário'],
+                h: 'A numeração dos paletes precisava continuar única enquanto o agendador de sincronização grava em paralelo na mesma base: reserva sob bloqueio (select_for_update) com nova tentativa automática quando a base está travada.'
+            },
+            'Work permits & maintenance orders': {
+                c: 'Havia dois aplicativos separados para HSE e manutenção, com duas interfaces e dois endereços diferentes para os mesmos usuários.',
+                f: ['<strong>Permissões de trabalho</strong>: CRUD completo, checklists de referência (riscos, EPIs, bloqueios)', '<strong>Solicitações e ordens de serviço</strong>: envio → verificação/planejamento → aceite ou recusa, peças consumidas sincronizadas a partir do ERP', '<strong>Impressão dos formulários de qualidade</strong> (FOR.HSE / FOR.MAINT) em PDF no navegador, fiéis aos originais', 'Moldes vinculados às solicitações, sincronizados a partir do ERP', 'Nenhuma alteração no backend: reaproveitamento dos endpoints existentes'],
+                h: 'Portar de forma idêntica layouts PDF feitos com o pacote “pdf” do Flutter para @react-pdf/renderer, e rodar o sistema antigo e o novo em paralelo durante a validação.'
+            },
+            'Predictive maintenance': {
+                c: 'As falhas das injetoras eram tratadas depois do fato. O histórico de paradas existia, mas não era aproveitado.',
+                f: ['Variáveis construídas a partir do histórico (frequência e duração das paradas recentes, ciclo, turno, molde)', '<strong>Classificação XGBoost</strong> da parada e de sua causa provável', '<strong>Validação cruzada temporal</strong> para evitar qualquer vazamento de dados do futuro', 'API Django REST + app mobile Flutter para operadores e manutenção'],
+                h: 'Dados de paradas muito desbalanceados e ruidosos (causas em texto livre): limpeza dos rótulos e uma métrica adequada (AUC) em vez da simples acurácia.'
+            },
+            'Purchasing dashboard (V1 & V2)': {
+                c: 'O responsável de compras acompanhava os pedidos da marca Home Life em uma página HTML que guardava tudo no navegador: sem backup e sem compartilhamento.',
+                f: ['App Django “achats”: pedidos, recebimentos, fornecedores, tarefas e subtarefas, metas de orçamento e frequência, registro, anexos', 'SPA React com todos os cálculos de negócio portados fielmente da ferramenta original', 'Importação do histórico existente (backup JSON) por um endpoint dedicado', '<strong>V2</strong>: nova interface sobre os mesmos dados, V1 mantida em paralelo, mudanças no backend apenas aditivas'],
+                h: 'Migrar sem perda e sem mudança de comportamento para o usuário: cada cálculo do antigo JavaScript foi reproduzido de forma idêntica antes de melhorar a interface.'
+            },
+            'Kelio time clock & headcount': {
+                c: 'Todo dia, um arquivo de texto listava quem tinha batido ponto às 6h, 14h e 21h; os líderes de equipe o usavam para alocar operadores às máquinas.',
+                f: ['Conexão somente leitura à base Firebird embarcada do relógio de ponto Kelio', 'Exploração e extração do esquema da base proprietária', 'Página “Efetivo” agregada por turno, sem dados nominativos'],
+                h: 'Uma base proprietária sem documentação, em porta não padrão e com autenticação Firebird específica: diagnóstico remoto com o cliente oficial do Firebird e um script de exploração somente leitura.'
+            },
+            'Procedures & handover hub': {
+                c: 'Os procedimentos estavam dispersos, e a empresa queria medir o quão perto estava da ISO 9001, ao mesmo tempo em que preparava a chegada de novos profissionais de TI.',
+                f: ['Procedimentos versionados com histórico, avaliações e constatações', '<strong>Pontuação de conformidade</strong> estimada (em vigor / rascunho / não conformidade), substituível por uma avaliação manual', 'Etapas de integração para os novos contratados de TI', '<strong>Vitrine técnica</strong> de todos os projetos gerada automaticamente por um script de varredura (linguagens, arquitetura, dependências), sem nunca copiar segredos'],
+                h: 'Adicionar um módulo completo sem afetar a estabilidade do backend compartilhado: app Django sem dependências de migração, publicado por um script que adiciona apenas duas linhas à configuração de produção.'
+            },
+            'KEBA KePlast press monitoring': {
+                c: 'O estado das prensas (em operação, parada, reinício) só era visível na própria máquina.',
+                f: ['Engenharia reversa da API HTTP do controlador KEBA (POST /login, cookies de sessão)', 'Tratamento de versões antigas de SSL/TLS nos controladores', 'Histórico de paradas e reinícios, dashboard em tempo real'],
+                h: 'Sem documentação pública: tudo foi deduzido observando o tráfego da interface web do controlador.'
+            },
+            'Goods receipt, Odoo & reports': {
+                c: 'Muitas tarefas repetitivas de relatórios e administração eram feitas à mão todos os dias.',
+                f: ['Dashboard React de <strong>controle de recebimento</strong> de mercadorias', 'Scripts Python Odoo RPC para gestão de compras e faturas', 'Relatórios Excel diários de faturamento (xlsxwriter + SQL Server)', 'Painel de controle de compras (openpyxl)', 'Automação do firewall pfSense via SSH (paramiko)'],
+                h: 'Tornar essas automações confiáveis sem supervisão: scripts idempotentes, com logs e agendados.'
+            },
+            'Superette — POS, stock & analytics': {
+                c: 'Os pequenos comércios argelinos costumam usar caixas caros ou pouco adequados. Eu queria um software moderno, fácil de instalar na rede local, que aproveitasse o celular do funcionário em vez de comprar hardware.',
+                f: ['<strong>PDV desktop</strong> (Flutter Windows/macOS/Linux): venda, descontos por linha e por cupom, impostos, margem, códigos de balança, cupons em espera, atalhos F2–F9', '<strong>Celular = leitor sem fio</strong>: pareia escaneando um QR code no caixa, sem Bluetooth nem driver', '<strong>Recebimento de entregas</strong> no celular com a margem projetada exibida ao vivo', 'Inventários, consulta de preço na gôndola, clientes, fornecedores', 'Estatísticas de vendas, papéis (admin, gerente, caixa, almoxarife) que escondem as telas não autorizadas', 'Servidor Django + DRF com documentação interativa da API; dados de demonstração (45 produtos EAN-13, 45 dias de vendas)', 'Testes automatizados do cálculo do cupom, a parte em que um erro custa dinheiro'],
+                h: 'Tornar instantâneo o pareamento celular ↔ caixa: o QR contém o endereço do servidor e um canal temporário (expira em 12 h), então o celular se configura sozinho.'
+            },
+            'IronCore — gym management': {
+                c: 'Os donos de academias costumam controlar os planos em cadernos ou Excel e não têm um controle confiável na entrada.',
+                f: ['<strong>Entrada com Face ID</strong>: varredura pela webcam a cada 1,5 s, o aluno entra sem fazer nada; antiduplicidade configurável', '<strong>Cartão de aluno com QR</strong> imprimível no formato de cartão bancário (PDF com foto), lido por leitor USB', 'Modo totem em tela cheia: veredito, plano, dias ou sessões restantes, motivo da recusa', 'Planos por duração, pacotes de sessões, diárias, congelamento de plano', 'Loja de suplementos, estatísticas detalhadas', '100% local e offline (SQLite), nenhuma conexão externa'],
+                h: 'O plugin de câmera do Flutter não abria algumas webcams de notebook. Criei um pequeno serviço Python local (OpenCV + InsightFace) que cuida da câmera e calcula as assinaturas faciais; o app passa a usá-lo automaticamente quando ele está rodando.'
+            },
+            'Rihla — hiking platform': {
+                c: 'Os organizadores de trilhas na Argélia controlam as inscrições pelo Facebook e WhatsApp. O Rihla centraliza a oferta, as reservas e os pagamentos.',
+                f: ['<strong>5 superfícies</strong>: app do cliente (Flutter), app Rihla Pro para organizadores, dashboard de administração, app web do cliente, site institucional', 'Reservas com status (pendente, sinal enviado, confirmada, recusada, cancelada, concluída)', '<strong>Pontos de fidelidade</strong> e avaliações, creditados por uma tarefa agendada ao fim do passeio', 'Mapa do ponto de encontro e do destino, distância rodoviária calculada com OpenRouteService', 'Guias e páginas em <strong>FR / EN / AR</strong> armazenados no banco, editáveis sem novo deploy', 'Papéis: super admin, admin, agente de campo limitado, organizador, cliente', 'Hospedagem cPanel / LiteSpeed, API Django + MySQL, SSL em todos os subdomínios'],
+                h: 'Publicar 5 aplicações em hospedagem compartilhada: subdomínios dedicados, fallback de SPA e tipos MIME forçados via .htaccess, tarefas cron para as transições de status.'
+            },
+            'TikRed — video-first food marketplace': {
+                c: 'Em Orã, muitos cozinheiros caseiros vendem por vídeos e tratam os pedidos por mensagem privada: pedidos perdidos, clientes que desistem, cancelamentos que custam os ingredientes.',
+                f: ['Feed de vídeos no estilo rede social, pedido direto a partir do vídeo', '<strong>Uma única conta</strong>: qualquer cliente pode ativar um perfil de cozinheiro', 'Sinal parcial configurável (CCP), pré-encomendas com gestão de overbooking e reembolsos', 'Mapa de descoberta de negócios, visibilidade online / só no mapa / pausada', 'Backend Django modular (catálogo, pedidos, pagamentos, entrega, social, notificações), back-office React, site Next.js', 'Versão localizada em darija em alfabeto latino'],
+                h: 'Proteger o cozinheiro contra cancelamentos de última hora sem desanimar o cliente: sinal ajustável pelo cozinheiro e regras claras de reembolso.'
+            },
+            'CovX — ride-hailing app': {
+                c: 'Projeto para dominar um fluxo de negócio completo em tempo real, do ponto de embarque até o pagamento.',
+                f: ['Escolha de origem e destino no mapa', 'Estimativa da tarifa conforme o tipo de veículo, tarifa final na chegada', 'Máquina de estados da corrida: busca → aceita → iniciada → concluída / cancelada (com autor e motivo)', 'Papéis de passageiro e motorista, registro de horário em cada etapa'],
+                h: 'Manter transições de estado coerentes quando passageiro e motorista agem ao mesmo tempo.'
+            },
+            'Retail-store scraper — 58 provinces': {
+                c: 'Era preciso uma base de prospecção B2B (atacadistas e varejistas) cobrindo o país inteiro, sem API paga.',
+                f: ['Cruzamento das 58 províncias com palavras-chave em <strong>francês, árabe e darija</strong>', 'Coleta rápida rolando os resultados, depois enriquecimento ficha por ficha', 'Retomada após falhas graças a checkpoints', 'Remoção de duplicados e exportação final para Excel'],
+                h: 'As buscas em árabe e darija costumam trazer resultados melhores que o francês para o comércio local: era preciso combinar as três e remover duplicados corretamente.'
+            },
+            'ASVES — asves-dz.com': {
+                c: 'A associação precisava de uma presença online clara e moderna para seus membros e eventos.',
+                f: ['Design moderno e responsivo', 'Conteúdo estruturado e otimizado para SEO', 'Hospedagem e publicação no cPanel'],
+                h: 'Entregar um site rápido e fácil de manter para uma equipe não técnica.'
+            },
+            'HomeLife / HomeLife Pro': {
+                c: 'A marca queria que seus revendedores pudessem fazer pedidos online em vez de por telefone.',
+                f: ['Catálogo de produtos, pedidos e acompanhamento de entregas', 'App Flutter para revendedores', 'Site Django + TailwindCSS, nova versão em Next.js', 'Mapa dos pontos de venda'],
+                h: 'Adaptar preços e condições conforme o tipo de cliente (atacadista, varejista, hipermercado).'
+            },
+            'Felanout': {
+                c: 'Conectar restaurantes com sobras ou horários vazios a clientes em busca de boas ofertas.',
+                f: ['3 aplicativos Flutter que compartilham os mesmos componentes', 'Gestão de descontos e programa de fidelidade', 'Acompanhamento de pedidos em tempo real (Firebase)'],
+                h: 'Sincronizar em tempo real três apps com papéis diferentes sobre os mesmos pedidos.'
+            },
+            'SAFHADID — weighbridge': {
+                c: 'As pesagens de caminhões eram anotadas à mão, com risco de erros e fraude.',
+                f: ['Leitura direta do peso no indicador (porta COM)', 'Pesagem de entrada/saída e cálculo do peso líquido', 'Histórico e tíquetes de pesagem'],
+                h: 'Interpretar um fluxo serial bruto e instável para obter um peso confiável.'
+            },
+            'Fennec Invest': {
+                c: 'Oferecer uma interface mobile simples para acompanhar e gerir uma carteira de criptomoedas.',
+                f: ['Acompanhamento de carteira', 'Gráficos de cotação em tempo real', 'Autenticação segura'],
+                h: 'Exibir gráficos fluidos com dados que mudam continuamente.'
+            }
+        }
+    };
+
+    // Screenshots (demo data, sensitive areas cropped), keyed by English title
+    const SHOTS = {
+        'Daily Scorecard + AI tab': ['img/scorecard-assistant.webp'],
+        'Inventory & pallet labels': ['img/inventaire-accueil.webp', 'img/inventaire-fiche-palette.webp'],
+        'Work permits & maintenance orders': ['img/permis-tableau-de-bord.webp', 'img/permis-nouveau.webp'],
+        'Goods receipt, Odoo & reports': ['img/controle-reception.webp'],
+        'Procedures & handover hub': ['img/procedures-accueil.webp']
+    };
+
     const FIELD_POS = { type: 0, title: 1, short: 2 };
     // text of a project field in the current language
     function tr(p, field) {
@@ -1754,10 +2014,10 @@
     }
 
     const UI = {
-        fr: { live: 'En ligne', more: 'Voir le détail', ctx: 'Contexte', feat: "Ce que j'ai réalisé", chal: 'Défi technique', stack: 'Stack', visit: 'Visiter', note: '', name: 'Votre nom', email: 'votre@email.com', msg: 'Parlez-moi de votre projet…', empty: 'Veuillez remplir tous les champs.', opening: "Votre messagerie va s'ouvrir avec le message prêt à envoyer.", subject: 'Contact portfolio — ' },
-        en: { live: 'Live', more: 'See details', ctx: 'Context', feat: 'What I built', chal: 'Technical challenge', stack: 'Stack', visit: 'Visit', note: '', name: 'Your name', email: 'you@email.com', msg: 'Tell me about your project…', empty: 'Please fill in all fields.', opening: 'Your email app will open with the message ready to send.', subject: 'Portfolio contact — ' },
-        es: { live: 'En línea', more: 'Ver detalle', ctx: 'Contexto', feat: 'Lo que hice', chal: 'Reto técnico', stack: 'Stack', visit: 'Visitar', note: 'Detalle disponible en inglés.', name: 'Tu nombre', email: 'tu@email.com', msg: 'Cuéntame tu proyecto…', empty: 'Rellena todos los campos.', opening: 'Se abrirá tu correo con el mensaje listo para enviar.', subject: 'Contacto portfolio — ' },
-        pt: { live: 'No ar', more: 'Ver detalhes', ctx: 'Contexto', feat: 'O que fiz', chal: 'Desafio técnico', stack: 'Stack', visit: 'Visitar', note: 'Detalhes disponíveis em inglês.', name: 'Seu nome', email: 'voce@email.com', msg: 'Conte-me sobre seu projeto…', empty: 'Preencha todos os campos.', opening: 'Seu e-mail vai abrir com a mensagem pronta para enviar.', subject: 'Contato portfólio — ' }
+        fr: { live: 'En ligne', more: 'Voir le détail', ctx: 'Contexte', feat: "Ce que j'ai réalisé", chal: 'Défi technique', stack: 'Stack', visit: 'Visiter', name: 'Votre nom', email: 'votre@email.com', msg: 'Parlez-moi de votre projet…', empty: 'Veuillez remplir tous les champs.', opening: "Votre messagerie va s'ouvrir avec le message prêt à envoyer.", subject: 'Contact portfolio — ' },
+        en: { live: 'Live', more: 'See details', ctx: 'Context', feat: 'What I built', chal: 'Technical challenge', stack: 'Stack', visit: 'Visit', name: 'Your name', email: 'you@email.com', msg: 'Tell me about your project…', empty: 'Please fill in all fields.', opening: 'Your email app will open with the message ready to send.', subject: 'Portfolio contact — ' },
+        es: { live: 'En línea', more: 'Ver detalle', ctx: 'Contexto', feat: 'Lo que hice', chal: 'Reto técnico', stack: 'Stack', visit: 'Visitar', name: 'Tu nombre', email: 'tu@email.com', msg: 'Cuéntame tu proyecto…', empty: 'Rellena todos los campos.', opening: 'Se abrirá tu correo con el mensaje listo para enviar.', subject: 'Contacto portfolio — ' },
+        pt: { live: 'No ar', more: 'Ver detalhes', ctx: 'Contexto', feat: 'O que fiz', chal: 'Desafio técnico', stack: 'Stack', visit: 'Visitar', name: 'Seu nome', email: 'voce@email.com', msg: 'Conte-me sobre seu projeto…', empty: 'Preencha todos os campos.', opening: 'Seu e-mail vai abrir com a mensagem pronta para enviar.', subject: 'Contato portfólio — ' }
     };
 
     const CATS = [
@@ -1786,9 +2046,12 @@
     function renderProjects() {
         const grid = document.getElementById('projects-grid');
         const list = PROJECTS.map((p, i) => ({ p, i })).filter(({ p }) => currentFilter === 'all' || p.cat === currentFilter);
-        grid.innerHTML = list.map(({ p, i }) => `
+        grid.innerHTML = list.map(({ p, i }) => {
+            const shot = (SHOTS[p.title.en] || [])[0];
+            return `
             <button class="proj-card" data-idx="${i}">
-                <div class="proj-header" style="background:linear-gradient(135deg,${p.grad})">
+                <div class="proj-header${shot ? ' has-shot' : ''}" style="background:linear-gradient(135deg,${p.grad})">
+                    ${shot ? `<img class="proj-shot" src="${shot}" alt="" loading="lazy">` : ''}
                     ${p.link ? `<span class="proj-live">${UI[lang].live}</span>` : ''}
                     <i class="fas ${p.icon}"></i>
                 </div>
@@ -1797,9 +2060,10 @@
                     <h3>${esc(tr(p, 'title'))}</h3>
                     <p>${esc(tr(p, 'short'))}</p>
                     <div class="proj-tags">${p.stack.slice(0, 5).map(s => `<span class="proj-tag">${esc(s)}</span>`).join('')}</div>
-                    <span class="proj-more">${UI[lang].more} <i class="fas fa-arrow-right"></i></span>
+                    <span class="proj-more">${UI[lang].more}${shot ? ' · <i class="fas fa-image"></i>' : ''} <i class="fas fa-arrow-right"></i></span>
                 </div>
-            </button>`).join('');
+            </button>`;
+        }).join('');
         grid.querySelectorAll('.proj-card').forEach(c => c.addEventListener('click', () => openModal(+c.dataset.idx)));
     }
 
@@ -1812,17 +2076,20 @@
         openIdx = i;
         lastFocus = document.activeElement;
         const L = UI[lang];
-        const dl = p.context[lang] ? lang : 'en';
+        const d = p.context[lang]
+            ? { c: p.context[lang], f: p.features[lang], h: p.challenge[lang] }
+            : (PXD[lang] && PXD[lang][p.title.en]) || { c: p.context.en, f: p.features.en, h: p.challenge.en };
+        const shots = SHOTS[p.title.en] || [];
         document.getElementById('m-head').style.background = `linear-gradient(135deg,${p.grad})`;
         document.getElementById('m-icon').className = `fas ${p.icon}`;
         document.getElementById('m-type').textContent = tr(p, 'type');
         document.getElementById('m-title').textContent = tr(p, 'title');
         // features contain trusted <strong> markup authored above
         document.getElementById('m-body').innerHTML = `
-            ${dl !== lang && L.note ? `<p class="form-hint"><i class="fas fa-language"></i> ${L.note}</p>` : ''}
-            <div class="m-sec"><h4><i class="fas fa-circle-info"></i>${L.ctx}</h4><p>${esc(p.context[dl])}</p></div>
-            <div class="m-sec"><h4><i class="fas fa-list-check"></i>${L.feat}</h4><ul>${p.features[dl].map(f => `<li>${f}</li>`).join('')}</ul></div>
-            <div class="m-sec m-challenge"><h4><i class="fas fa-bolt"></i>${L.chal}</h4><p>${esc(p.challenge[dl])}</p></div>
+            ${shots.length ? `<div class="m-gallery">${shots.map(s => `<a href="${s}" target="_blank" rel="noopener"><img src="${s}" alt="${esc(tr(p, 'title'))}" loading="lazy"></a>`).join('')}</div>` : ''}
+            <div class="m-sec"><h4><i class="fas fa-circle-info"></i>${L.ctx}</h4><p>${esc(d.c)}</p></div>
+            <div class="m-sec"><h4><i class="fas fa-list-check"></i>${L.feat}</h4><ul>${d.f.map(f => `<li>${f}</li>`).join('')}</ul></div>
+            <div class="m-sec m-challenge"><h4><i class="fas fa-bolt"></i>${L.chal}</h4><p>${esc(d.h)}</p></div>
             <div class="m-sec"><h4><i class="fas fa-layer-group"></i>${L.stack}</h4><div class="proj-tags">${p.stack.map(s => `<span class="proj-tag">${esc(s)}</span>`).join('')}</div></div>
             ${p.link ? `<div class="m-actions"><a class="btn-primary" href="${p.link}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i>${L.visit} ${esc(p.linkLabel)}</a></div>` : ''}`;
         modal.classList.add('open');
